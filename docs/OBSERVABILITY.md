@@ -1,10 +1,36 @@
-# Observabilidade — Clicksign Ruby SDK
+# Observabilidade — Clicksign Python SDK
 
-A gem não depende de APM nem OpenTelemetry. Expõe **hooks leves** (`Clicksign.on_request`, `on_retry`, `on_error`) e `Configuration#logger` para erros em callbacks. Você conecta ao stack que já usa (Rails.logger, StatsD, OTel manual, Sentry).
+A SDK não depende de APM nem OpenTelemetry. Expõe **hooks leves** (`clicksign.on_request`, `on_retry`, `on_error`), **logging integrado** (`clicksign.log` / `CLICKSIGN_LOG`) e `Configuration.logger` para erros em callbacks customizados. Você conecta ao stack que já usa (structlog, OTel manual, Sentry).
 
 ---
 
-## Eventos disponíveis
+## Logging integrado
+
+Ative logs HTTP sem registrar callbacks manualmente:
+
+```python
+import clicksign
+
+clicksign.log = "info"          # resumo: method, path, status, duration
+clicksign.log = "debug"         # inclui headers (Authorization redacted) e bodies truncados
+clicksign.configure(log="warn") # retries
+# export CLICKSIGN_LOG=debug
+```
+
+| Nível | O que registra |
+|-------|----------------|
+| `debug` | Request/response completos (headers sanitizados, body até 4 KiB) |
+| `info` | Resumo por tentativa HTTP |
+| `warn` | Retries antes do backoff |
+| `error` | Falha final (após esgotar retries) |
+
+Logger stdlib: `logging.getLogger("clicksign")`. Se sua app já configura handlers para esse logger, a SDK só ajusta o nível; caso contrário, adiciona um `StreamHandler` simples.
+
+`Authorization` e headers sensíveis nunca aparecem nos logs. Os hooks `on_*` continuam disponíveis para métricas, tracing ou logs estruturados no formato da sua aplicação.
+
+---
+
+## Eventos disponíveis (hooks)
 
 | Evento | Quando dispara | Onde |
 |--------|----------------|------|
@@ -50,7 +76,93 @@ Em erros HTTP, `:request` e `:error` disparam na mesma falha (request com status
 
 ---
 
-## Rails — logs estruturados
+## Correlation id (`X-Correlation-Id`)
+
+Propague o id da sua requisição HTTP ou job para chamadas da SDK:
+
+```python
+from clicksign import ClicksignClient, RequestOptions, correlation_id
+
+client = ClicksignClient(api_key="...", environment="sandbox")
+client.envelopes.retrieve(
+    "uuid",
+    options=RequestOptions(headers=correlation_id("req-abc-123")),
+)
+# equivalent: headers={"X-Correlation-Id": "req-abc-123"}
+```
+
+Helper: `clicksign.correlation_id(value)` → `dict` pronto para `RequestOptions.headers`. Constante: `CORRELATION_ID_HEADER`.
+
+Em falhas, use `error.request_id` (resposta `X-Request-Id` da Clicksign) para suporte — distinto do correlation id que **você** envia.
+
+---
+
+## Python — logs estruturados (stdlib)
+
+```python
+import logging
+import clicksign
+
+clicksign.configure(api_key="...", environment="sandbox", log="info")
+
+# Ou integre com o logging da sua app:
+logger = logging.getLogger("clicksign")
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s"))
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
+clicksign.set_log("debug")
+
+clicksign.on_request(lambda e: logger.info("clicksign.request", extra=e))
+```
+
+Cookbook structlog: [`cookbook/09-observability-structlog.md`](cookbook/09-observability-structlog.md).
+
+---
+
+## Python — PII em `on_error`
+
+O payload do hook **não** inclui `response_body` por padrão. Se você acessar a exceção, **evite** logar ou enviar ao Sentry/Datadog:
+
+- `error.response_body` — JSON completo da API (pode ter e-mail, CPF, conteúdo de documento)
+- Atributos de resources em mensagens de validação
+
+**Faça:**
+
+```python
+clicksign.on_error(
+    lambda e: logger.error(
+        "clicksign.error",
+        method=e["method"],
+        path=e["path"],
+        status=e.get("status"),
+        error=type(e["error"]).__name__,
+        detail=str(e["error"]),
+        request_id=getattr(e["error"], "request_id", None),
+    )
+)
+```
+
+O logger integrado da SDK (`CLICKSIGN_LOG=debug`) trunca bodies e redige `Authorization`; callbacks customizados são responsabilidade do host app.
+
+---
+
+## Python — OpenTelemetry e métricas
+
+- OpenTelemetry manual: [`cookbook/10-observability-opentelemetry.md`](cookbook/10-observability-opentelemetry.md)
+- Prometheus / StatsD via hooks: [`cookbook/11-observability-metrics.md`](cookbook/11-observability-metrics.md)
+
+Não há módulo `clicksign.metrics` no core — hooks são o ponto de extensão.
+
+---
+
+## Python — testes
+
+`tests/conftest.py` chama `clicksign.instrumentation.clear()` após cada teste para não vazar callbacks entre casos.
+
+---
+
+## Rails — logs estruturados (Ruby SDK)
 
 ```ruby
 # config/initializers/clicksign.rb

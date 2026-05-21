@@ -1,196 +1,152 @@
-# SDK Test Matrix — Required Behavioral Coverage
+# SDK Test Matrix — Cobertura comportamental (Python)
 
-Every item below **must** have a corresponding test. Mark with ✓ as implemented.
-Reference implementation: `../clicksign-ruby-sdk/spec/`
+Cada item deve ter teste em `tests/clicksign/`. Marque `[x]` quando coberto.
+
+**Referência:** `tests/clicksign/test_*.py` e `tests/clicksign/resources/`.
+
+**Defaults atuais:** `max_retries=3` (global/client); timeouts `2` / `10` / `10` s.
 
 ---
 
-## Configuration
+## Configuration — `test_configuration.py`
 
-- [ ] Defaults: production base_url, open_timeout=2, read_timeout=10, write_timeout=10, max_retries=0, logger=None
-- [ ] `environment='sandbox'` sets sandbox URL
-- [ ] `environment='production'` sets production URL
-- [ ] Unknown environment raises ValueError
-- [ ] Accepts a logger object
+- [x] Defaults: production base_url, open/read/write timeouts, `max_retries=3`, logger=None
+- [x] `environment='sandbox'` / `'production'`
+- [x] Unknown environment raises ValueError
+- [x] Accepts a logger object
 
-## HTTP Client
+---
 
-- [ ] GET sends correct headers (Authorization, Content-Type, Accept)
-- [ ] POST sends body as JSON
-- [ ] PATCH sends body as JSON
-- [ ] DELETE sends no body
-- [ ] `Authorization` header has NO `Bearer` prefix — raw token only
-- [ ] Raises `TimeoutError` on connect timeout
-- [ ] Raises `TimeoutError` on read timeout
-- [ ] Raises `TimeoutError` on connection refused
+## HTTP Client — `test_client.py`, `test_http_transport.py`
 
-## Error handler
+- [x] GET/POST/PATCH/DELETE headers e body
+- [x] `Authorization` sem prefixo `Bearer`
+- [x] TimeoutError em connect / read / connection refused
+- [x] `open_timeout` / `read_timeout` / `write_timeout` repassados ao transporte
+- [x] `HttpxHTTPClient` opcional (`test_client.py`)
 
-- [ ] 401 → `AuthenticationError`
-- [ ] 403 → `AuthenticationError`
-- [ ] 404 → `NotFoundError`
-- [ ] 400 → `ValidationError`
-- [ ] 422 → `ValidationError` with message from `errors[0].detail`
-- [ ] 409 → `ConflictError`
-- [ ] 429 → `RateLimitError`
-- [ ] 500 → `ServerError`
-- [ ] Non-JSON body → falls back to HTTP reason phrase
-- [ ] JSON array body (not dict) → falls back to HTTP reason phrase, no TypeError
-- [ ] `errors[0].title` used when `detail` is absent
-- [ ] Empty body → falls back to HTTP reason phrase
-- [ ] `status_code` exposed on exception
-- [ ] `request_id` from `X-Request-Id` header
-- [ ] `rate_limit_remaining` / `rate_limit_reset` on `RateLimitError`
-- [ ] `retryable` is True for RateLimitError, ServerError, TimeoutError
-- [ ] `retryable` is False for ValidationError, NotFoundError, AuthenticationError
+---
 
-## Retry
+## Error handler — `test_error_handler.py`, `test_errors.py`, `test_structured_errors.py`
 
-- [ ] `max_retries=0` makes exactly 1 request
-- [ ] Retries on 500 (ServerError) and succeeds on next attempt
-- [ ] Retries on 429 (RateLimitError) and succeeds on next attempt
-- [ ] Retries on TimeoutError and succeeds on next attempt
-- [ ] Does NOT retry on 422 (ValidationError)
-- [ ] Raises after exhausting max_retries (1 + N total requests)
-- [ ] Sleeps with exponential backoff between retries
-- [ ] Sleep duration is < ceiling(attempt) (full jitter, not fixed)
+- [x] Mapeamento 401, 403, 404, 400, 422, 409, 429, 5xx
+- [x] Body não-JSON, array JSON, title sem detail, body vazio
+- [x] `status_code`, `request_id`, rate limit headers em 429
+- [x] `retryable` True/False por tipo
 
-## RetryBackoff
+---
 
-- [ ] `ceiling(1)` = 0.5
-- [ ] `ceiling(2)` = 1.0
-- [ ] `ceiling(10)` = 30.0 (capped)
-- [ ] `delay(attempt)` returns value in [0, ceiling)
-- [ ] Returns 0.0 when ceiling is 0
-- [ ] Spread across multiple calls (not always the same value)
+## Retry — `test_client.py`, `test_request_options.py`
 
-## JsonApiSerializer
+- [x] `max_retries=0` → uma tentativa
+- [x] Retry 500, 429, TimeoutError; não retry 422
+- [x] Esgota após N retries; backoff com jitter
+- [x] 429 com header `Retry-After` (`test_retry_backoff.py`)
+- [x] `RequestOptions.max_retries` override (`test_request_options.py`)
 
-- [ ] Create: no `id`, no `relationships` key when empty
-- [ ] Update: includes `id`
-- [ ] With relationships: included in payload
-- [ ] Empty relationships: `relationships` key omitted
-- [ ] nil/None attributes: passed through
+---
 
-## JsonApiParser
+## RetryBackoff — `test_retry_backoff.py`
 
-- [ ] Single object: returns as one-element list internally
-- [ ] Array: returns all items
-- [ ] Empty/null data: returns empty list
-- [ ] Included resources parsed correctly
-- [ ] Included entries without `type` filtered out
-- [ ] Missing attributes/relationships default to empty dict
+- [x] `ceiling`, `delay`, `parse_retry_after`, `retry_delay`
 
-## QueryBuilder
+---
 
-- [ ] `filter(key=val)` → `filter[key]=val`
-- [ ] `filter(false_val=False)` → included (False is a valid filter)
-- [ ] `order('name')` → `sort=name`
-- [ ] `order('-created')` → `sort=-created`
-- [ ] `page(2)` → `page[number]=2`
-- [ ] `per(50)` → `page[size]=50`
-- [ ] `with_includes('a', 'b')` → `include=a,b`
-- [ ] `fields(envelopes=['name','status'])` → `fields[envelopes]=name,status`
-- [ ] All methods chainable (return builder)
-- [ ] `to_params()` combines all accumulated params
+## JsonApiSerializer / Parser — `test_json_api_serializer.py`, `test_json_api_parser.py`
 
-## Resource base
+- [x] Create/update payload rules
+- [x] Parse single/array/empty, included, filter sem `type`
 
-- [ ] `resource_type` inferred from class name (snake_case + plural)
-- [ ] Explicit `resource_type` overrides inference
-- [ ] Inferred type handles anonymous/unnamed class safely
-- [ ] `endpoint` defaults to `/resource_type`
-- [ ] `endpoint` can be overridden
-- [ ] `list()` returns list of instances (no args)
-- [ ] `list()` raises when given args
-- [ ] `retrieve(id)` returns single instance
-- [ ] `create(**attrs)` returns new instance
-- [ ] `update(**attrs)` sends PATCH, returns self
-- [ ] `delete()` sends DELETE, returns None
-- [ ] `reload()` refreshes from API
-- [ ] Dynamic attribute access (`instance.name`)
-- [ ] `instance['name']` via `__getitem__`
-- [ ] Unknown attribute raises AttributeError (not silent)
-- [ ] `id` and `relationships` accessible
-- [ ] `base_path` defaults to endpoint
+---
 
-## QueryProxy
+## QueryBuilder — `test_query_builder.py`
 
-- [ ] `filter()` returns QueryProxy
-- [ ] `order()` returns QueryProxy
-- [ ] `with_includes()` returns QueryProxy
-- [ ] `fields()` returns QueryProxy
-- [ ] `page()` returns QueryProxy
-- [ ] `per()` returns QueryProxy
-- [ ] `with_includes()` raises ValueError for empty args
-- [ ] `with_includes()` raises ValueError for non-string types
-- [ ] `to_list()` executes request, returns list
-- [ ] `first()` returns first item
-- [ ] `last()` returns last item
-- [ ] `count()` returns int
-- [ ] Iterable (for-loop, list comprehension)
+- [x] filter, order, page, per (max 50), includes, fields, chain
+- [x] `per` acima do máximo levanta ValueError
 
-## Auto-pagination
+---
 
-- [ ] Yields all records across multiple pages
-- [ ] Uses `links.next` when present to determine end
-- [ ] When `links.next` is null, stops without extra request (even if page is exactly full)
-- [ ] Falls back to item-count heuristic when API omits `links`
-- [ ] Falls back: makes one extra request when last page is exactly full
-- [ ] Composable with `filter` and `order`
-- [ ] Default page size is 20
-- [ ] Raises on API error mid-pagination
+## Resource / QueryProxy / pagination — `test_resource.py`, `test_pagination.py`, `test_last_response.py`
 
-## Instrumentation
+- [x] CRUD, dynamic attrs, QueryProxy chain
+- [x] Auto-pagination: `links.next`, heurística, página cheia extra
+- [x] `QueryProxy.last_response` por página; `on_page` callback
+- [x] `page_responses` lista metadados
 
-- [ ] `:request` published on successful request (method, path, status, attempt, duration_ms)
-- [ ] `:request` published even when request raises error
-- [ ] `:error` published with exception on HTTP error
-- [ ] `:error` published on timeout (status=None)
-- [ ] `:retry` published before each retry (attempt, max_retries, error, wait_ms)
-- [ ] One `:request` event per attempt on retry
-- [ ] Callback exception does NOT propagate to caller
-- [ ] Remaining callbacks run after one raises
-- [ ] With `config.logger` set: callback error logged via `logger.warning`
-- [ ] Without logger: callback errors silent
-- [ ] `Clicksign.on_request`, `on_retry`, `on_error` top-level helpers
-- [ ] `clear()` removes all callbacks (for test teardown)
-- [ ] `BulkOperationsClient` publishes `:request` and `:error`
+---
 
-## BulkOperationsClient
+## Instrumentation — `test_instrumentation.py`, `test_client.py`
 
-- [ ] Sends `Authorization`, `Content-Type`, `Accept` headers
-- [ ] POST body is JSON
-- [ ] Returns parsed body when `atomic:results` present (no exception)
-- [ ] Top-level `errors` → raises exception
-- [ ] 422 → `ValidationError`
-- [ ] 500 → `ServerError`
-- [ ] 401 → `AuthenticationError`
-- [ ] Invalid JSON body → does not raise `JSONDecodeError`
-- [ ] Retries on TimeoutError, succeeds on subsequent attempt
-- [ ] Does NOT retry on ServerError (500) — only timeouts
-- [ ] Raises after exhausting max_retries
+- [x] request / retry / error events
+- [x] Callback exception não propaga; `clear()` no `conftest`
+- [x] `on_request`, `on_retry`, `on_error` no pacote raiz
 
-## Services (thread-local)
+---
 
-- [ ] `with Services(api_key=...) as svc: svc.use(...)` routes resource calls through service client
-- [ ] Does not use global client inside block
-- [ ] Restores previous client after block (including on exception)
-- [ ] Unknown environment raises ValueError
+## BulkOperationsClient — `test_bulk_operations_client.py`
 
-## Webhook
+- [x] Headers, POST JSON, parse `atomic:results`
+- [x] Retry só TimeoutError; **não** retry 500
+- [x] Instrumentation
 
-- [ ] Valid signature returns True
-- [ ] Invalid signature returns False (constant-time)
-- [ ] Empty payload validates correctly
-- [ ] Uses `hmac.compare_digest` (not `==`)
+---
 
-## Resource specs (per resource)
+## Services — `test_services.py`
 
-Each resource spec must cover:
-- [ ] `describe 'resource configuration'`: `resource_type` and `endpoint` values
-- [ ] All CRUD methods available per route (`only:`/`except:`)
-- [ ] `.filter()` with at least one filter param
-- [ ] Error paths: `ValidationError` (422) for `.create`/`.update`; `NotFoundError` (404) for `.retrieve`/`.delete`
-- [ ] Relationship accessors (e.g., `envelope_id`, `signer_id`)
-- [ ] Routes with `except: [:update]` raise `NotImplementedError`
+- [x] `use()` isola client; restaura após bloco e exceção
+- [x] Unknown environment
+
+---
+
+## Webhook — `test_webhook.py`
+
+- [x] `verify_signature`, `construct_event`, constant-time compare
+
+---
+
+## ClicksignClient / raw — `test_clicksign_client.py`, `test_raw_request.py`
+
+- [x] Facade namespaces, `raw_request`, `deserialize`, `last_response`
+
+---
+
+## Async — `test_async_client.py`, `test_async_clicksign_client.py`
+
+- [x] AsyncClient HTTP; AsyncClicksignClient resources e paginação
+
+---
+
+## Logging / UA / telemetry — `test_log.py`, `test_user_agent.py`, `test_provider_telemetry.py`
+
+- [x] `CLICKSIGN_LOG`, redação de Authorization
+- [x] User-Agent + `set_app_info`
+- [x] Telemetria opt-in
+
+---
+
+## Request headers — `test_request_options.py`
+
+- [x] `correlation_id()` → `X-Correlation-Id` merged
+
+---
+
+## Resource specs — `tests/clicksign/resources/`
+
+Cobertura por resource (CRUD, filter, erros 404/422 onde aplicável):
+
+- [x] Notarial: envelope, document, signer, requirement, signature_watcher, bulk_requirement, event
+- [x] Admin: user, template, template_field, membership, group, folder, webhook, event
+- [x] Parcial: acceptance_term, auto_signature, access_control_list, envelope_bulk_creation (conforme métodos expostos)
+
+Adicionar testes ao criar novos métodos em [`SDK_CLIENT_GAPS.md`](SDK_CLIENT_GAPS.md) §3.
+
+---
+
+## Bulk vs Client retry (documentado + testado)
+
+| Política | Teste |
+|----------|--------|
+| Client retenta 429/5xx/timeout | `test_client.py` |
+| Bulk retenta só timeout | `test_bulk_operations_client.py` (`test_does_not_retry_on_server_error`) |
+
+Ver [`cookbook/01-retries.md`](cookbook/01-retries.md).

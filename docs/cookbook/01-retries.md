@@ -1,107 +1,123 @@
 # Retries e timeouts
 
-A gem expõe timeouts e retentativas automáticas na configuração global, em `Clicksign::Services` e em `Clicksign::Client.new`. O backoff usa exponencial com **full jitter** (`Clicksign::RetryBackoff`) para reduzir picos quando muitos clientes falham ao mesmo tempo.
+A SDK expõe timeouts e retentativas na config global, em `Services`, `ClicksignClient` e `RequestOptions`. O backoff é exponencial com **full jitter** (`retry_backoff`); em 429 usa `max(jitter, Retry-After)` quando o header existir.
 
 ---
 
-## Configuração global (Rails initializer)
+## Configuração global
 
-```ruby
-# config/initializers/clicksign.rb
-require 'clicksign'
+```python
+import clicksign
 
-Clicksign.configure do |c|
-  c.api_key       = ENV.fetch('CLICKSIGN_API_KEY')
-  c.environment   = :production   # ou :sandbox
-  c.open_timeout  = 2             # conexão (s) — padrão 2
-  c.read_timeout  = 30            # leitura (s) — aumente para PDFs grandes
-  c.write_timeout = 30            # escrita (s)
-  c.max_retries   = 3             # 0 = desligado (padrão)
-end
+clicksign.configure(
+    api_key="...",
+    environment="sandbox",  # ou base_url explícito
+    open_timeout=2.0,
+    read_timeout=30.0,   # PDFs grandes
+    write_timeout=30.0,
+    max_retries=3,       # padrão 3; 0 = desliga retry automático
+)
 ```
 
 ---
 
-## Multi-conta com retry por tenant
+## Client explícito ou multi-tenant
 
-`Clicksign::Services` repassa timeouts e `max_retries` para o `Client` usado dentro de `use`:
+```python
+from clicksign import ClicksignClient, Services
 
-```ruby
-tenant_service = Clicksign::Services.new(
-  api_key: tenant.clicksign_token,
-  environment: :production,
-  read_timeout: 45,
-  max_retries: 2
+client = ClicksignClient(
+    api_key=tenant_token,
+    environment="production",
+    read_timeout=45.0,
+    max_retries=2,
 )
 
-tenant_service.use do
-  Clicksign::Resources::Notarial::Envelope.retrieve(envelope_id)
-end
+tenant = Services(api_key=tenant_token, environment="production", max_retries=2)
+
+with tenant.use():
+    from clicksign import Envelope
+    Envelope.retrieve(envelope_id)
 ```
 
-> **Nota:** `BulkRequirement` usa `Clicksign.bulk_operations_client`, criado a partir da **config global** (`Clicksign.configure`). Em apps multi-tenant, defina `max_retries` no initializer global ou execute bulk jobs com a mesma política de retry para todos os tenants. Hooks `:request`/`:retry`/`:error` funcionam no bulk; retry automático continua **só em timeout**. Ver [Vários clientes](04-multi-client.md).
+**Override por chamada** (precedência: request > client > global):
+
+```python
+from clicksign import RequestOptions
+
+client.envelopes.retrieve(
+    envelope_id,
+    options=RequestOptions(max_retries=0, read_timeout=60.0),
+)
+```
 
 ---
 
-## O que é retentado automaticamente
+## Bulk vs `Client`
 
-| Erro | `Client` (resources) | `BulkOperationsClient` (`BulkRequirement`) |
-|------|----------------------|--------------------------------------------|
-| Timeout / conexão (`TimeoutError`) | Sim | Sim |
-| HTTP 429 (`RateLimitError`) | Sim | Não |
-| HTTP 5xx (`ServerError`) | Sim | Não |
+| Erro | `Client` (resources) | `BulkOperationsClient` |
+|------|-------------------|------------------------|
+| Timeout / conexão | Sim | Sim |
+| HTTP 429 | Sim (+ `Retry-After`) | **Não** |
+| HTTP 5xx | Sim | **Não** |
 | 401, 403, 404, 422 | Não | Não |
 
-Total de tentativas HTTP = **1 + `max_retries`** (a primeira falha conta como tentativa 1).
+Total de tentativas HTTP = **1 + `max_retries`**.
+
+`bulk_requirements` usa o bulk client da mesma config/client que `ClicksignClient` passa no construtor. Em multi-tenant com `Services`, o bulk segue a config global memoizada — veja [04-multi-client.md](04-multi-client.md).
 
 ---
 
 ## Observar retries em produção
 
-```ruby
-Clicksign.on_retry do |event|
-  Rails.logger.warn(
-    "[Clicksign] retry #{event[:attempt]}/#{event[:max_retries]} " \
-    "#{event[:method]} #{event[:path]} wait=#{event[:wait_ms]}ms " \
-    "error=#{event[:error].class}"
-  )
-end
+```python
+import clicksign
 
-Clicksign.on_error do |event|
-  Sentry.capture_exception(event[:error]) if defined?(Sentry)
-end
+clicksign.on_retry(
+    lambda e: print(
+        f"retry {e['attempt']}/{e['max_retries']} "
+        f"{e['method']} {e['path']} wait={e['wait_ms']}ms "
+        f"{type(e['error']).__name__}"
+    )
+)
+
+clicksign.on_error(
+    lambda e: print(
+        type(e["error"]).__name__,
+        getattr(e["error"], "request_id", None),
+    )
+)
 ```
 
-O evento `:retry` é publicado **antes** do `sleep`; `wait_ms` reflete o delay com jitter daquela tentativa.
+`:retry` dispara **antes** do `sleep`; `wait_ms` é o delay daquela tentativa.
 
 ---
 
 ## Rate limit além do retry automático
 
-```ruby
-Envelope = Clicksign::Resources::Notarial::Envelope
+```python
+from clicksign.errors import RateLimitError
 
-begin
-  Envelope.retrieve(envelope_id)
-rescue Clicksign::RateLimitError => e
-  # e.retryable? => true
-  # e.rate_limit_remaining, e.rate_limit_reset — quando a API envia os headers
-  Rails.logger.warn("Rate limit — reset: #{e.rate_limit_reset}")
-  raise # ou reenfileirar job Sidekiq com delay
-end
+try:
+    client.envelopes.retrieve(envelope_id)
+except RateLimitError as e:
+    # e.retryable is True
+    # e.rate_limit_remaining, e.rate_limit_reset quando a API envia headers
+    raise
 ```
 
 ---
 
 ## Quando não aumentar `max_retries`
 
-- **422 / 400** — corrigir payload (envelope em `draft` para requirements, campos obrigatórios, etc.).
-- **401 / 403** — token ou ambiente (`:sandbox` vs `:production`) incorreto.
-- **POST sem idempotência** na sua aplicação — retries podem duplicar efeitos colaterais se a API não for idempotente para aquele endpoint.
+- **422 / 400** — corrigir payload.
+- **401 / 403** — token ou ambiente (`sandbox` vs `production`).
+- POST sem idempotência na API — retries podem repetir efeitos colaterais.
 
 ---
 
 ## Referência
 
-- README: [Timeouts, retry e instrumentação](../../README.md#timeouts-retry-e-instrumentação)
-- Implementação: `lib/clicksign/retry_backoff.rb`, `lib/clicksign/client.rb`
+- Contrato: [`SDK_CONTRACT.md`](../SDK_CONTRACT.md) §6
+- Código: `src/clicksign/retry_backoff.py`, `src/clicksign/http_executor.py`
+- Testes: `tests/clicksign/test_client.py`, `tests/clicksign/test_bulk_operations_client.py`

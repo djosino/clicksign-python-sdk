@@ -68,7 +68,28 @@ class ClicksignWebhooksController < ApplicationController
 end
 ```
 
-Variante sem exceção:
+Equivalente em Python (validação + parse em um passo):
+
+```python
+import os
+
+from clicksign import WebhookPayloadError, WebhookSignatureError, construct_event
+
+def handle_webhook(request):
+    payload = request.body  # bytes brutos, sem reformatar JSON
+    signature = request.headers.get("Content-HMAC", "")
+    secret = os.environ["CLICKSIGN_WEBHOOK_SECRET"]
+
+    try:
+        event = construct_event(payload, signature, secret, tolerance=300)
+    except (WebhookSignatureError, WebhookPayloadError):
+        return Response(status=401)
+
+    process_event.delay(event.payload)
+    return Response(status=200)
+```
+
+Variante em duas etapas (validação manual):
 
 ```ruby
 unless Clicksign::Webhook.verify_signature(payload, signature, secret: secret)

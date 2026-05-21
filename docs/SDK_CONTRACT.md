@@ -38,7 +38,7 @@ Single configuration object, set once at startup. Attributes:
 | `open_timeout` | float | 2.0 | TCP connect timeout (seconds) |
 | `read_timeout` | float | 10.0 | Read timeout (seconds) |
 | `write_timeout` | float | 10.0 | Write timeout (seconds) |
-| `max_retries` | int | 0 | Retry attempts (0 = no retry) |
+| `max_retries` | int | 3 | Retry attempts (0 = no retry) |
 | `logger` | Logger | None | Optional logger for callback errors |
 
 `environment=` shortcut sets `base_url` from the table above.
@@ -185,7 +185,9 @@ Resource.filter(status='running') \
         .to_list()   # executes
 ```
 
-Methods: `filter(**kw)`, `order(field)`, `page(n)`, `per(n)`, `with_includes(*types)`, `fields(**types)`
+Methods: `filter(**kw)`, `order(field)`, `page(n)`, `per(n)` (max 50 — see `pagination.MAX_PAGE_SIZE`), `with_includes(*types)`, `fields(**types)`, `on_page(callback)`
+
+See [`PAGINATION.md`](PAGINATION.md) for `last_response` / `page_responses` per page and `links.next` vs. count heuristic.
 
 `with_includes` validates: types must be str, raises `ValueError` if empty or wrong type.
 
@@ -281,7 +283,8 @@ Clicksign.instrumentation.clear()   # for tests
 
 - Single global configuration — not safe for concurrent mutation
 - Thread-local client: `Services.use(api_key, base_url)` context manager sets client for current thread only
-- Async (asyncio/trio): out of scope for v1; use thread-local approach or instantiate per-coroutine
+- Async: use `AsyncClicksignClient` / `AsyncClient` (`pip install clicksign[async]`). Do not rely on `Services.use()` under asyncio; pass an explicit async client per app/coroutine scope
+- Instance updates in async flows: `update_async`, `delete_async`, `reload_async` on resources returned by the async client
 
 ## 12. Webhook validation
 

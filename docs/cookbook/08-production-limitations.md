@@ -1,86 +1,100 @@
-# Limitações de produção
+# Limitações de produção (Python SDK)
 
-Comportamentos **esperados** do design atual (stdlib-only, sem deps de runtime). Não são bugs — planeje a arquitetura da app em cima deles.
+Comportamentos **esperados** do design atual. Não são bugs — planeje a arquitetura em cima deles.
 
 ---
 
-## 1. Sem connection pool
+## 1. Connection pool (transporte HTTP)
 
-Cada chamada HTTP usa `Net::HTTP.start` e encerra a conexão ao fim do bloco. Não há pool persistente entre requests.
+### Default: sem pool
 
-### Impacto
+`UrllibHTTPClient` (padrão, zero deps) usa `http.client` e **fecha a conexão** ao fim de cada request. Não há reutilização de TCP/TLS entre chamadas.
+
+### Impacto qualitativo
 
 | Cenário | Efeito |
 |---------|--------|
 | Scripts / jobs sequenciais | Geralmente aceitável |
-| Puma com muitas threads e muitas chamadas Clicksign por request | Overhead de TCP/TLS repetido; latência e uso de file descriptors sobem |
-| Burst de dezenas de requests paralelos | Pode virar gargalo visível antes da API limitar |
+| API web com várias chamadas Clicksign por request | Overhead de handshake repetido; latência e file descriptors sobem |
+| Burst paralelo (threads ou `asyncio.gather`) | Gargalo de conexão pode aparecer antes do rate limit da API |
 
-### Mitigações na aplicação
+Ordem de grandeza típica em bursts (mesmo host, TLS já “quente” no OS): **httpx com pool** costuma reduzir latência média por request frente ao stdlib quando há dezenas de chamadas seguidas no mesmo processo — meça no seu ambiente; não há benchmark oficial no repositório.
 
-- Reduzir chamadas (batch `BulkRequirement`, menos round-trips).
-- Cache leituras idempotentes no seu lado.
-- Enfileirar trabalho pesado (Sidekiq) em vez de N chamadas síncronas no request cycle.
-- Se precisar de pool persistente, use `Clicksign::Client` via adapter próprio (fora do escopo da gem hoje) — a gem não expõe hook de transporte customizado.
+### Mitigação recomendada: `HttpxHTTPClient`
 
-### Por que a gem é assim
+```bash
+pip install clicksign[httpx]
+```
 
-Dependência de runtime **apenas stdlib** (`net/http`, `json`, `uri`) — troca simplicidade e zero deps por throughput máximo em alta concorrência.
+```python
+from clicksign import ClicksignClient, HttpxHTTPClient
+
+http = HttpxHTTPClient()  # uma instância por processo/worker
+client = ClicksignClient(api_key="...", environment="production", http_client=http)
+```
+
+Receita completa (singleton): [`12-http-connection-pool.md`](12-http-connection-pool.md).
+
+Outras mitigações:
+
+- Menos round-trips (`bulk_requirements`, includes, menos `retrieve` em loop).
+- Cache de leituras idempotentes no seu lado.
+- Fila de jobs (Celery, RQ) em vez de N chamadas síncronas no request cycle.
+
+### Custom transport
+
+Qualquer objeto que implemente `HTTPClient` pode ser injetado em `configure(http_client=...)` ou `ClicksignClient(http_client=...)`.
 
 ---
 
-## 2. `Thread.current` e runtimes com Fibers
+## 2. `Services.use()` e asyncio
 
-`Clicksign::Services#use` guarda o client em `Thread.current[:clicksign_client]`. Resources resolvem o client assim:
+`Services.use()` grava o client em `threading.local`. Resources resolvem o client assim:
 
-```ruby
-Thread.current[:clicksign_client] || Clicksign.client
+```python
+Thread.current_thread().__dict__["_clicksign_client"]  # simplificado
 ```
 
 ### Onde funciona bem
 
-- **Rails + Puma** (uma thread por request) com `tenant.clicksign_service.use` no controller/middleware.
-- **Sidekiq** (uma thread por job).
-- Scripts e consoles.
+- **Django / Flask / FastAPI (sync views)** com um thread por request e `with tenant.use():`
+- **Celery** (um thread por task)
+- Scripts e consoles
 
-### Onde **não** funciona
+### Onde não funciona bem
 
-- **Falcon**, **async-ruby**, ou código que cria **Fibers** filhos que chamam `Resources::*` **fora** do mesmo fluxo de `use` — o Fiber pode não ver o `Thread.current` definido no bloco pai.
-- Corrotinas que alternam entre tenants sem `use` por contexto de execução.
+- **asyncio** com `Services.use()` — o contexto thread-local não segue corrotinas
+- Código que chama `Envelope.list()` sem `use()` no mesmo thread
 
 ### Mitigações
 
 | Abordagem | Quando |
 |-----------|--------|
-| `Clicksign.configure` global por processo | Single-tenant ou um token por worker |
-| `Clicksign::Client.new` explícito por task/fiber | Controle total; não passa por `Thread.current` |
-| `Services#use` no **mesmo** Fiber/thread que faz as chamadas | Se o runtime propagar `Thread.current` (nem sempre) |
-| Evitar `Services` em stack async-fiber | Preferir client explícito |
+| `clicksign.configure()` global | Single-tenant por processo |
+| `ClicksignClient` / `AsyncClicksignClient` explícito | Multi-tenant, FastAPI, controle total |
+| `Services.use()` no mesmo thread que chama a SDK | Apps WSGI sync |
 
-Exemplo com client explícito (não usa `Services`):
+Async: [`README` — Async](../../README.md#async-fastapi-asyncio) · multi-conta: [`04-multi-client.md`](04-multi-client.md).
 
-```ruby
-client = Clicksign::Client.new(api_key: token, environment: :production)
+---
 
-# Chamadas HTTP diretas ou envolver Resources manualmente não é suportado —
-# para fibers, single-tenant global configure costuma ser o caminho mais simples.
-```
+## 3. Bulk vs retry
 
-Para multi-tenant em runtime fiberizado: associe um `Client` (ou token) ao contexto da sua app (objeto Fiber-local customizado) e avalie contribuição futura de API `Fiber.storage` — **não disponível na gem hoje**.
+`BulkOperationsClient` só retenta **timeout de rede**, não 429/5xx (POST atômico sem idempotência). Ver [`01-retries.md`](01-retries.md).
 
 ---
 
 ## Checklist rápido
 
-- [ ] Alta carga HTTP → medir latência; considerar fila de jobs
-- [ ] Multi-tenant → `Services#use` por request/job em Puma/Sidekiq
-- [ ] Falcon/async → não depender de `Services#use` sem validar; usar `configure` ou `Client.new`
-- [ ] Observabilidade → `on_request` / `on_retry` para detectar volume e lentidão
+- [ ] Alta carga HTTP → `pip install clicksign[httpx]` + `HttpxHTTPClient` compartilhado por worker
+- [ ] Multi-tenant sync → `Services.use()` por request/job
+- [ ] FastAPI/async → `AsyncClicksignClient`, não `Services.use()`
+- [ ] Observabilidade → `on_request` / `CLICKSIGN_LOG` para volume e lentidão
 
 ---
 
 ## Referência
 
-- README: [Limitações e produção](../../README.md#limitações-e-produção)
-- Multi-conta: [04-multi-client.md](04-multi-client.md)
-- Arquitetura: [ARCHITECTURE.md](../ARCHITECTURE.md)
+- README: [HTTP transport and connection pool](../../README.md#http-transport-and-connection-pool)
+- Arquitetura: [`ARCHITECTURE.md`](../ARCHITECTURE.md)
+- Roadmap v2 (httpx como default?): [`SDK_ROADMAP.md`](../SDK_ROADMAP.md) §1
