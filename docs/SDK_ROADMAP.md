@@ -26,10 +26,10 @@ Roadmap de infraestrutura e DX do SDK Clicksign Python (camada HTTP, resources, 
 - [x] Verificação HMAC de webhook (`verify_signature`, `construct_event`)
 - [x] Multi-tenant via thread-local (`Services.use()`)
 - [x] Operações atômicas (`BulkOperationsClient`)
-- [x] Instrumentation hooks (`on_request`, `on_retry`, `on_error`)
+- [x] Hooks de instrumentation (`on_request`, `on_retry`, `on_error`)
 - [x] Transporte plugável (`UrllibHTTPClient`, `HttpxHTTPClient` extra)
 - [x] Timeouts `open` / `read` / `write`
-- [x] `ClicksignClient` facade + `raw_request` / `deserialize`
+- [x] Facade `ClicksignClient` + `raw_request` / `deserialize`
 - [x] `RequestOptions` (api_key, headers, timeouts, `max_retries`)
 - [x] `last_response` / `ResponseMetadata`
 - [x] JSON:API `included` (sideload)
@@ -39,8 +39,8 @@ Roadmap de infraestrutura e DX do SDK Clicksign Python (camada HTTP, resources, 
 - [x] Telemetria opt-in (`enable_telemetry`)
 - [x] Tipagem TypedDict (14 resources) — [`TYPES.md`](TYPES.md)
 - [x] `AsyncClicksignClient` + `clicksign[async]`
-- [x] `correlation_id()` helper
-- [x] Runtime default stdlib-only; extras `httpx` / `async`
+- [x] Helper `correlation_id()`
+- [x] Runtime padrão apenas stdlib; extras `httpx` / `async`
 
 ---
 
@@ -48,11 +48,11 @@ Roadmap de infraestrutura e DX do SDK Clicksign Python (camada HTTP, resources, 
 
 **Prioridade:** Baixa (v2) / Design parcial — **implementado (v1 mínimo)**
 
-**Alvo:** clientes HTTP intercambiáveis; proxy e `verify_ssl_certs` configuráveis.
+**Objetivo:** clientes HTTP intercambiáveis; proxy e `verify_ssl_certs` configuráveis.
 
-**Clicksign:** `UrllibHTTPClient` (default via `http.client`), `HttpxHTTPClient` (extra `[httpx]`), injeção via `http_client=` em `Client`, `BulkOperationsClient`, `Services` e `configure()`.
+**Clicksign:** `UrllibHTTPClient` (padrão via `http.client`), `HttpxHTTPClient` (extra `[httpx]`), injeção via `http_client=` em `Client`, `BulkOperationsClient`, `Services` e `configure()`.
 
-**Impacto:** sem connection pool no default stdlib; pool disponível ao injetar `HttpxHTTPClient` ou client custom.
+**Impacto:** sem connection pool no padrão stdlib; pool disponível ao injetar `HttpxHTTPClient` ou client customizado.
 
 ### Checklist
 
@@ -66,8 +66,8 @@ Roadmap de infraestrutura e DX do SDK Clicksign Python (camada HTTP, resources, 
 
 ### Futuro (v2 — não implementado)
 
-- [ ] Avaliar `HttpxHTTPClient` como transporte **default** (breaking: dependência de runtime `httpx`)
-- [ ] Se mudar default: major version + guia de migração (`UrllibHTTPClient` explícito para quem quiser stdlib-only)
+- [ ] Avaliar `HttpxHTTPClient` como transporte **padrão** (breaking: dependência de runtime `httpx`)
+- [ ] Se mudar o padrão: major version + guia de migração (`UrllibHTTPClient` explícito para quem quiser stdlib-only)
 
 Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-connection-pool.md), [`08-production-limitations.md`](examples/08-production-limitations.md).
 
@@ -77,7 +77,7 @@ Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-conn
 
 **Prioridade:** Alta
 
-**Alvo:** timeouts de conexão, leitura e escrita aplicados pelo HTTP client.
+**Objetivo:** timeouts de conexão, leitura e escrita aplicados pelo HTTP client.
 
 **Clicksign:** `Configuration` expõe os três timeouts; `UrllibHTTPClient` aplica via `http.client` (connect/write/read separados).
 
@@ -108,7 +108,7 @@ Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-conn
 - [x] Paginação async (`async for`)
 - [x] Documentar incompatibilidade de `Services.use()` com asyncio
 - [x] Extra `clicksign[async]` no `pyproject.toml`
-- [x] Testes `pytest-asyncio`
+- [x] Testes com `pytest-asyncio`
 
 ---
 
@@ -116,7 +116,7 @@ Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-conn
 
 **Prioridade:** Média
 
-**Alvo:** client explícito com namespace de resources (`client.envelopes.list()`).
+**Objetivo:** client explícito com namespace de resources (`client.envelopes.list()`).
 
 **Clicksign:** `configure()` + import de resources; `Client`, `Services` e `ClicksignClient` exportados em `clicksign.__all__`.
 
@@ -134,7 +134,7 @@ Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-conn
 
 **Prioridade:** Média
 
-**Alvo:** override de api key, headers e timeouts por chamada.
+**Objetivo:** override de api key, headers e timeouts por chamada.
 
 **Clicksign:** config global, `Services.use()` por thread ou `ClicksignClient`; override via `RequestOptions`.
 
@@ -152,7 +152,7 @@ Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-conn
 
 **Prioridade:** Média
 
-**Alvo:** metadados HTTP acessíveis após sucesso (status, headers).
+**Objetivo:** metadados HTTP acessíveis após sucesso (status, headers).
 
 **Clicksign:** `Resource.last_response` e `QueryProxy.last_response` com `ResponseMetadata`.
 
@@ -170,7 +170,7 @@ Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-conn
 
 **Prioridade:** Média
 
-**Alvo:** chamada HTTP bruta + deserialização opcional para resources.
+**Objetivo:** chamada HTTP bruta + deserialização opcional para resources.
 
 **Clicksign:** `Client.raw_request()` e `Client.deserialize()` expostos publicamente.
 
@@ -189,13 +189,13 @@ Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-conn
 
 **Prioridade:** Média
 
-**Alvo:** erros de API com código, ponteiro de campo e lista completa de erros.
+**Objetivo:** erros de API com código, ponteiro de campo e lista completa de erros.
 
 **Clicksign:** `ValidationError` e demais exceções expõem `errors`, `error_code`, `source_pointer` e `api_errors`.
 
 ### Checklist
 
-- [x] Expor `errors: list[dict]` (ou typed) em `ValidationError` / `ClicksignError`
+- [x] Expor `errors: list[dict]` (ou tipado) em `ValidationError` / `ClicksignError`
 - [x] Expor `error_code` / `source.pointer` quando presentes (JSON:API)
 - [x] Manter `message` como atalho para o primeiro erro (compatibilidade)
 - [x] Testes: múltiplos erros no body 422
@@ -207,15 +207,15 @@ Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-conn
 
 **Prioridade:** Alta
 
-**Alvo:** resolver relacionamentos incluídos na mesma resposta (equivalente a “expand”).
+**Objetivo:** resolver relacionamentos incluídos na mesma resposta (equivalente a "expand").
 
-**Clicksign:** `with_includes()` envia o param; `included` é indexado e relacionamentos sideloaded resolvem em atributos (`envelope.folder`).
+**Clicksign:** `with_includes()` envia o param; `included` é indexado e relacionamentos com sideload resolvem em atributos (`envelope.folder`).
 
 ### Checklist
 
 - [x] Retornar `included` de `_parse_response` (ou objeto `ParsedResponse` público)
 - [x] Indexar `included` por `(type, id)` para lookup
-- [x] Resolver relacionamentos sideloaded em `Resource` (ex.: `envelope.folder`)
+- [x] Resolver relacionamentos com sideload em `Resource` (ex.: `envelope.folder`)
 - [x] `QueryProxy.with_includes()` popula sideload nos itens retornados
 - [x] Testes: list com `include=folder` retorna folder resolvível
 - [x] Documentar limites (includes aninhados, polymorphic)
@@ -226,7 +226,7 @@ Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-conn
 
 **Prioridade:** Média
 
-**Alvo:** validar assinatura e parsear payload em um passo (`construct_event`).
+**Objetivo:** validar assinatura e parsear payload em um passo (`construct_event`).
 
 **Clicksign:** `verify_signature()` / `verify_signature_or_raise()` + `construct_event()` → `WebhookEvent`.
 
@@ -245,7 +245,7 @@ Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-conn
 |---------|----------------|
 | Header | `Content-HMAC` com valor `sha256=<hex>` |
 | Algoritmo | HMAC-SHA256 do **body bruto** (não reformatar JSON antes do hash) |
-| Anti-replay | `tolerance` opcional checando `event.occurred_at` no JSON |
+| Anti-replay | `tolerance` opcional verificando `event.occurred_at` no JSON |
 | Payload | `{ "event": { "name", "data", "occurred_at" }, ...recursos do evento }` |
 
 ---
@@ -254,7 +254,7 @@ Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-conn
 
 **Prioridade:** Baixa
 
-**Alvo:** logger dedicado do SDK com nível via env; logs HTTP em debug sem vazar secrets.
+**Objetivo:** logger dedicado do SDK com nível via env; logs HTTP em debug sem vazar secrets.
 
 **Clicksign:** logger `clicksign.*` via stdlib; `clicksign.log` / `CLICKSIGN_LOG`; `Configuration.logger` para erros em callbacks customizados.
 
@@ -264,7 +264,7 @@ Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-conn
 - [x] Nível configurável via env `CLICKSIGN_LOG=debug|info`
 - [x] Log de request/response em debug (sem vazar api_key)
 - [x] Integrar com hooks existentes ou substituir parcialmente
-- [x] Documentar em README e `OBSERVABILITY.md`
+- [x] Documentar no README e em `OBSERVABILITY.md`
 
 ---
 
@@ -272,7 +272,7 @@ Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-conn
 
 **Prioridade:** Baixa
 
-**Alvo:** identificar SDK e app host no `User-Agent`.
+**Objetivo:** identificar SDK e app host no `User-Agent`.
 
 **Clicksign:** `User-Agent` com versão do SDK e Python; `set_app_info()` para identificar a app host.
 
@@ -290,13 +290,13 @@ Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-conn
 
 **Prioridade:** Baixa / Design (opt-in)
 
-**Alvo:** telemetria de latência enviada ao provedor da API, desligável.
+**Objetivo:** telemetria de latência enviada ao provedor da API, desligável.
 
-**Clicksign:** telemetria opt-in (`enable_telemetry`, default `False`); hooks locais (`on_request`) permanecem.
+**Clicksign:** telemetria opt-in (`enable_telemetry`, padrão `False`); hooks locais (`on_request`) permanecem.
 
 ### Checklist
 
-- [x] Flag `enable_telemetry` (default `False` até endpoint oficial)
+- [x] Flag `enable_telemetry` (padrão `False` até endpoint oficial)
 - [x] Respeitar privacidade (sem payload/body)
 - [x] Documentar opt-out
 
@@ -306,7 +306,7 @@ Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-conn
 
 **Prioridade:** Média
 
-**Alvo:** TypedDict / `Unpack` por resource; autocomplete no IDE.
+**Objetivo:** TypedDict / `Unpack` por resource; autocomplete no IDE.
 
 **Clicksign:** TypedDict + properties explícitas nos resources principais; `QueryProxy[T]` genérico.
 
@@ -315,7 +315,7 @@ Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-conn
 - [x] TypedDict por resource principal (Envelope, Document, Signer, …)
 - [x] Overloads em `create(**attrs)` / `update(**attrs)` onde viável
 - [x] Gerar types a partir de spec incremental (`scripts/generate_resource_types.py`)
-- [x] Documentar estratégia de versioning dos types
+- [x] Documentar estratégia de versionamento dos types
 - [x] CI: mypy nos resources tipados
 
 Ver [`docs/TYPES.md`](TYPES.md).
@@ -326,13 +326,13 @@ Ver [`docs/TYPES.md`](TYPES.md).
 
 **Prioridade:** Baixa / **Fora de escopo (N/A)**
 
-**Alvo:** retry automático em 409 apenas quando transitório e com idempotência.
+**Objetivo:** retry automático em 409 apenas quando transitório e com idempotência.
 
 **Clicksign:** `ConflictError(retryable=False)` — **decisão:** a API Clicksign não expõe 409 transitório.
 
 ### Checklist
 
-- [x] Validar com API Clicksign se 409 é transitório — **não há caso de uso**
+- [x] Validar com API Clicksign se 409 é transitório — **sem caso de uso**
 - [x] Retry 409 / idempotência — N/A
 
 ---
@@ -341,7 +341,7 @@ Ver [`docs/TYPES.md`](TYPES.md).
 
 **Prioridade:** Baixa
 
-**Alvo:** respeitar `Retry-After` em 429 quando presente.
+**Objetivo:** respeitar `Retry-After` em 429 quando presente.
 
 **Clicksign:** usa `Retry-After` em 429 (`max(jitter, retry_after)`); fallback para jitter.
 
@@ -358,7 +358,7 @@ Ver [`docs/TYPES.md`](TYPES.md).
 
 **Prioridade:** Design (documentado)
 
-**Alvo (SDK maduro):** mesma política de retry em todos os clients HTTP.
+**Objetivo (SDK maduro):** mesma política de retry em todos os clients HTTP.
 
 **Clicksign:** `BulkOperationsClient` retenta **apenas** `TimeoutError`; não retenta 429/5xx — ops atômicas não são idempotentes sem `Idempotency-Key` na API.
 
@@ -377,7 +377,7 @@ Ver [`docs/TYPES.md`](TYPES.md).
 
 - [x] Comportamento documentado em `SDK_CONTRACT.md` §6
 - [x] Tabela em `docs/examples/01-retries.md`
-- [x] Teste `test_does_not_retry_on_server_error` em bulk client
+- [x] Teste `test_does_not_retry_on_server_error` no bulk client
 - [x] Decisão: retry de 429 no bulk — **não** (sem idempotência)
 - [x] Documentar assimetria Client vs Bulk (este §17)
 
@@ -387,7 +387,7 @@ Ver [`docs/TYPES.md`](TYPES.md).
 
 **Prioridade:** Alta / **Fora de escopo (N/A)**
 
-**Alvo:** header `Idempotency-Key` em POST; retry seguro.
+**Objetivo:** header `Idempotency-Key` em POST; retry seguro.
 
 **Clicksign:** **não implementado** — a API Clicksign ainda não suporta o header no servidor.
 
@@ -406,14 +406,14 @@ Ver [`docs/TYPES.md`](TYPES.md).
 
 | Área | Onde |
 |------|------|
-| httpx como default (breaking) | §1 futuro v2 |
+| httpx como padrão (breaking) | §1 futuro v2 |
 | Idempotência / retry 409 | §15, §18 — N/A API |
 
 ### Design intencional
 
 | Item | Nota |
 |------|------|
-| stdlib default sem pool | [`examples/08-production-limitations.md`](examples/08-production-limitations.md) |
+| stdlib padrão sem pool | [`examples/08-production-limitations.md`](examples/08-production-limitations.md) |
 | Bulk sem retry 5xx/429 | `SDK_CONTRACT.md` §6, [`01-retries.md`](examples/01-retries.md) |
 | Retry 409 / idempotência | API não suporta |
 

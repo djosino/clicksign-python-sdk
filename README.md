@@ -1,24 +1,24 @@
 # Clicksign Python SDK
 
-Python client for the [Clicksign API v3](https://developers.clicksign.com/) (JSON:API).
+Cliente Python para a [Clicksign API v3](https://developers.clicksign.com/) (JSON:API).
 
-**Status:** beta — core notarial + admin resources, sync/async clients, webhooks, pagination, and observability hooks. See [`docs/SDK_CONTRACT.md`](docs/SDK_CONTRACT.md) and [`docs/SDK_ROADMAP.md`](docs/SDK_ROADMAP.md).
+**Status:** beta — recursos notariais e administrativos principais, clientes sync/async, webhooks, paginação e hooks de observabilidade. Veja [`docs/SDK_CONTRACT.md`](docs/SDK_CONTRACT.md) e [`docs/SDK_ROADMAP.md`](docs/SDK_ROADMAP.md).
 
-**Reference implementation:** [`../clicksign-ruby-sdk`](../clicksign-ruby-sdk)
+**Implementação de referência:** [`../clicksign-ruby-sdk`](../clicksign-ruby-sdk)
 
 ---
 
-## Documentation
+## Documentação
 
-**Index:** [`docs/README.md`](docs/README.md) — mapa por tema (contrato, roadmap, examples, observabilidade, paginação).
+**Índice:** [`docs/README.md`](docs/README.md) — mapa por tema (contrato, roadmap, exemplos, observabilidade, paginação).
 
-| Start here | Also |
+| Comece aqui | Também |
 |------------|------|
 | [`SDK_CONTRACT.md`](docs/SDK_CONTRACT.md) | [`SPEC.md`](docs/SPEC.md), [`WORKFLOW.md`](docs/WORKFLOW.md) |
 | [`OBSERVABILITY.md`](docs/OBSERVABILITY.md) | [`PAGINATION.md`](docs/PAGINATION.md), [`TYPES.md`](docs/TYPES.md) |
 | [`examples/`](docs/examples/) | [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 
-### API surface (`ClicksignClient`)
+### Superfície da API (`ClicksignClient`)
 
 | Namespace | Resource | Import alternativo |
 |-----------|----------|-------------------|
@@ -28,7 +28,7 @@ Python client for the [Clicksign API v3](https://developers.clicksign.com/) (JSO
 | `client.notarial.requirements` | `Requirement` | `from clicksign import Requirement` |
 | `client.notarial.bulk_requirements` | `BulkRequirement` | `from clicksign import BulkRequirement` |
 | `client.notarial.signature_watchers` | `SignatureWatcher` | `from clicksign.resources.notarial.signature_watcher import SignatureWatcher` |
-| — | `Event` (nested) | `Envelope.list_events(id)`, `Document.list_events(doc_id, envelope_id=…)`, `Event.create_for_document` |
+| — | `Event` (aninhado) | `Envelope.list_events(id)`, `Document.list_events(doc_id, envelope_id=…)`, `Event.create_for_document` |
 | `client.webhooks` | `Webhook` | `from clicksign.resources.webhook import Webhook` |
 | `client.users` | `User` | `from clicksign.resources.user import User` |
 | `client.templates` / `template_fields` | `Template`, `TemplateField` | `from clicksign.resources.template import Template` |
@@ -43,22 +43,22 @@ Endpoints sem resource dedicado: `client.raw_request()` + `client.deserialize()`
 
 ---
 
-## Requirements
+## Requisitos
 
 - Python >= 3.10
-- No runtime dependencies (stdlib only)
+- Sem dependências de runtime (apenas stdlib)
 
-Optional extras: `pip install clicksign[httpx]` for connection pooling and lower latency under load; `pip install clicksign[async]` for asyncio.
+Extras opcionais: `pip install clicksign[httpx]` para connection pooling e menor latência sob carga; `pip install clicksign[async]` para asyncio.
 
 ---
 
-## Usage
+## Uso
 
-The SDK supports two main patterns. Both call the same API; choose based on how your app manages credentials and concurrency.
+O SDK suporta dois padrões principais. Ambos chamam a mesma API; escolha com base em como sua aplicação gerencia credenciais e concorrência.
 
-### Global configuration (single tenant)
+### Configuração global (single tenant)
 
-Configure once at startup, then import resource classes directly. Best for scripts, workers with one API key per process, and quick prototypes.
+Configure uma vez na inicialização e importe as classes de resource diretamente. Ideal para scripts, workers com uma única API key por processo e protótipos rápidos.
 
 ```python
 import clicksign
@@ -74,13 +74,13 @@ envelope = Envelope.create(name="Contract", locale="pt-BR")
 document = Document.create(envelope_id=envelope.id, filename="contract.pdf", content_base64="...")
 ```
 
-Instrumentation hooks are also global:
+Os hooks de instrumentação também são globais:
 
 ```python
 clicksign.on_request(lambda payload: print(payload["method"], payload["path"]))
 ```
 
-Built-in HTTP logging:
+Log HTTP integrado:
 
 ```python
 import clicksign
@@ -91,13 +91,13 @@ clicksign.log = "debug"  # or: clicksign.configure(..., log="info")
 # Uses stdlib logger "clicksign"; Authorization is never logged.
 ```
 
-See [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md) for hooks, logging levels, structlog/OpenTelemetry/metrics examples, and **avoiding PII** in custom `on_error` handlers.
+Veja [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md) para hooks, níveis de logging, exemplos com structlog/OpenTelemetry/metrics e **como evitar PII** em handlers `on_error` customizados.
 
-**Correlation:** pass `X-Correlation-Id` per call via `RequestOptions(headers=correlation_id("your-id"))` to tie SDK requests to your web request or job id. The API may echo correlation in support; use `error.request_id` from `X-Request-Id` on failures for Clicksign support tickets.
+**Correlação:** passe `X-Correlation-Id` por chamada via `RequestOptions(headers=correlation_id("your-id"))` para vincular requisições do SDK ao seu web request ou job id. A API pode ecoar a correlação no suporte; use `error.request_id` de `X-Request-Id` em falhas para tickets de suporte da Clicksign.
 
-### Explicit client (`ClicksignClient`)
+### Cliente explícito (`ClicksignClient`)
 
-Create a client instance when you need multiple API keys in the same process, clearer discoverability, or no global state.
+Crie uma instância do cliente quando precisar de múltiplas API keys no mesmo processo, maior descobribilidade ou ausência de estado global.
 
 ```python
 from clicksign import ClicksignClient
@@ -126,7 +126,7 @@ client.notarial.bulk_requirements.create(
 )
 ```
 
-Each `ClicksignClient` owns its own HTTP and bulk clients. Pass a custom transport if needed:
+Cada `ClicksignClient` possui seus próprios clientes HTTP e bulk. Passe um transport customizado se necessário:
 
 ```python
 from clicksign import ClicksignClient, UrllibHTTPClient
@@ -138,11 +138,11 @@ client = ClicksignClient(
 )
 ```
 
-### HTTP transport and connection pool
+### HTTP transport e connection pool
 
-**Default:** `UrllibHTTPClient` (stdlib only, **no** connection pool — one TCP/TLS handshake per request). Fine for scripts and low QPS.
+**Padrão:** `UrllibHTTPClient` (apenas stdlib, **sem** connection pool — um handshake TCP/TLS por requisição). Adequado para scripts e baixo QPS.
 
-**High concurrency** (web apps, workers with many API calls per second): install httpx and inject a shared client:
+**Alta concorrência** (aplicações web, workers com muitas chamadas de API por segundo): instale httpx e injete um cliente compartilhado:
 
 ```bash
 pip install clicksign[httpx]
@@ -160,13 +160,13 @@ import clicksign
 clicksign.configure(api_key="...", environment="production", http_client=http)
 ```
 
-`AsyncClicksignClient` (`clicksign[async]`) also uses `httpx` with a connection pool on the event loop.
+`AsyncClicksignClient` (`clicksign[async]`) também usa `httpx` com connection pool no event loop.
 
-Trade-offs and mitigations: [`docs/examples/08-production-limitations.md`](docs/examples/08-production-limitations.md) · singleton recipe: [`docs/examples/12-http-connection-pool.md`](docs/examples/12-http-connection-pool.md).
+Trade-offs e mitigações: [`docs/examples/08-production-limitations.md`](docs/examples/08-production-limitations.md) · receita singleton: [`docs/examples/12-http-connection-pool.md`](docs/examples/12-http-connection-pool.md).
 
 ### Multi-tenant (thread-local)
 
-For web apps or job queues where each request/job uses a different API key, use `Services` to bind a client to the current thread without global `configure()`:
+Para aplicações web ou filas de jobs onde cada requisição/job usa uma API key diferente, use `Services` para vincular um cliente à thread atual sem o `configure()` global:
 
 ```python
 from clicksign import Envelope, Services
@@ -177,11 +177,11 @@ with tenant.use():
     Envelope.list()  # routed through this tenant's client
 ```
 
-`Services.use()` sets both the HTTP client and the bulk client for the thread. Prefer `ClicksignClient` directly when running under async/fiber runtimes where thread-local context may not propagate.
+`Services.use()` define tanto o cliente HTTP quanto o cliente bulk para a thread. Prefira `ClicksignClient` diretamente ao rodar sob runtimes async/fiber onde o contexto thread-local pode não se propagar.
 
 ### Async (FastAPI, asyncio)
 
-Install the optional extra: `pip install clicksign[async]` (requires `httpx`). The API is unchanged; the client runs non-blocking HTTP on your event loop.
+Instale o extra opcional: `pip install clicksign[async]` (requer `httpx`). A API permanece inalterada; o cliente executa HTTP não-bloqueante no seu event loop.
 
 ```python
 import asyncio
@@ -198,9 +198,9 @@ async def main():
 asyncio.run(main())
 ```
 
-Do not use `Services.use()` inside asyncio — pass an explicit `AsyncClicksignClient`. Bulk atomic operations remain on the sync `ClicksignClient.bulk` client for now.
+Não use `Services.use()` dentro do asyncio — passe um `AsyncClicksignClient` explícito. Operações atômicas bulk permanecem no cliente sync `ClicksignClient.bulk` por enquanto.
 
-Per-request overrides (api key, headers, timeouts, `max_retries`) without switching client. Default retry count is **3** (`max_retries=0` disables retries on a single call):
+Sobrescritas por requisição (api key, headers, timeouts, `max_retries`) sem trocar de cliente. O número padrão de retries é **3** (`max_retries=0` desativa retries em uma única chamada):
 
 ```python
 from clicksign import ClicksignClient, RequestOptions, correlation_id
@@ -226,11 +226,11 @@ client.envelopes.filter(status="draft").to_list(options={"api_key": "TENANT_KEY"
 client.envelopes.retrieve("uuid", options={"max_retries": 0})
 ```
 
-Precedence: **options on the call** override the client's defaults (thread-local and global config are unchanged).
+Precedência: **options na chamada** sobrescrevem os padrões do cliente (thread-local e configuração global não são alterados).
 
-### Unmapped or beta endpoints
+### Endpoints não mapeados ou beta
 
-Use `raw_request` for paths not yet covered by resource classes, then optionally deserialize:
+Use `raw_request` para caminhos ainda não cobertos pelas classes de resource e, opcionalmente, desserialize:
 
 ```python
 from clicksign import ClicksignClient, Envelope
@@ -244,11 +244,11 @@ envelope = client.deserialize(raw, Envelope)
 print(envelope.last_response.status)
 ```
 
-After any successful call, inspect HTTP metadata via `client.last_response`, `client.bulk_last_response`, or `resource.last_response` (`status`, `request_id`, rate limit headers).
+Após qualquer chamada bem-sucedida, inspecione os metadados HTTP via `client.last_response`, `client.bulk_last_response` ou `resource.last_response` (`status`, `request_id`, headers de rate limit).
 
-### Structured validation errors
+### Erros de validação estruturados
 
-On 400/422 responses, exceptions expose the full JSON:API `errors` array:
+Em respostas 400/422, as exceções expõem o array `errors` completo do JSON:API:
 
 ```python
 from clicksign.errors import ValidationError
@@ -263,11 +263,11 @@ except ValidationError as err:
         print(api_error.pointer, api_error.detail)
 ```
 
-Map field errors in forms using `source.pointer` or `source.parameter` from each entry in `err.errors` / `err.api_errors`.
+Mapeie erros de campo em formulários usando `source.pointer` ou `source.parameter` de cada entrada em `err.errors` / `err.api_errors`.
 
 ### JSON:API sideload (`included`)
 
-Request related resources in one call with `with_includes()` and access them as attributes:
+Solicite recursos relacionados em uma única chamada com `with_includes()` e acesse-os como atributos:
 
 ```python
 envelopes = client.envelopes.with_includes("folder").to_list()
@@ -275,11 +275,11 @@ print(envelopes[0].folder.name)  # sideloaded Folder, no extra HTTP call
 print(envelopes[0].included_resources)  # all entries from `included`
 ```
 
-**Limits:** only relationships present in `included` are resolved (otherwise `envelope.folder` is `None`); nested includes depend on what the API returns; unknown types fall back to base `Resource`.
+**Limitações:** apenas relacionamentos presentes em `included` são resolvidos (caso contrário `envelope.folder` é `None`); includes aninhados dependem do que a API retorna; tipos desconhecidos fazem fallback para `Resource` base.
 
-### User-Agent and app identification
+### User-Agent e identificação da aplicação
 
-Every request includes a `User-Agent` header identifying the SDK and Python runtime. Host apps can add their own identifier:
+Toda requisição inclui um header `User-Agent` identificando o SDK e o runtime Python. Aplicações host podem adicionar seu próprio identificador:
 
 ```python
 import clicksign
@@ -288,7 +288,7 @@ clicksign.set_app_info("My CRM", "2.1.0", "https://example.com")
 # User-Agent: clicksign-python/x.y.z Python/3.10.x My_CRM/2.1.0
 ```
 
-Per-client override:
+Sobrescrita por cliente:
 
 ```python
 from clicksign import AppInfo, ClicksignClient
@@ -296,9 +296,9 @@ from clicksign import AppInfo, ClicksignClient
 client = ClicksignClient(api_key="...", app_info=AppInfo(name="Tenant", version="1.0"))
 ```
 
-### Provider telemetry (opt-in)
+### Telemetria do provider (opt-in)
 
-The SDK can send anonymized latency metrics to Clicksign (no API keys, no request/response bodies). Disabled by default until you opt in:
+O SDK pode enviar métricas de latência anonimizadas para a Clicksign (sem API keys, sem corpos de requisição/resposta). Desativado por padrão até você fazer opt-in:
 
 ```python
 clicksign.configure(enable_telemetry=True)
@@ -309,24 +309,24 @@ clicksign.configure(enable_telemetry=False)
 clicksign.set_enable_telemetry(False)
 ```
 
-Custom endpoint (staging): `configure(enable_telemetry=True, telemetry_url="https://sandbox.clicksign.com/sdk/telemetry/v1/events")`.
+Endpoint customizado (staging): `configure(enable_telemetry=True, telemetry_url="https://sandbox.clicksign.com/sdk/telemetry/v1/events")`.
 
-Metrics include SDK version, Python version, HTTP method, normalized path (UUIDs masked), status, and duration.
+As métricas incluem versão do SDK, versão do Python, método HTTP, caminho normalizado (UUIDs mascarados), status e duração.
 
-### Which pattern to use?
+### Qual padrão usar?
 
-| Pattern | When |
+| Padrão | Quando |
 |---------|------|
-| `configure()` + resources | One API key per process; scripts; legacy style |
-| `ClicksignClient` | Multiple keys; explicit dependencies; new application code |
-| `Services.use()` | Multi-tenant Rails/Django/Celery-style apps (one thread per request/job) |
-| `HttpxHTTPClient` (shared) | High QPS per worker; see [connection pool](docs/examples/12-http-connection-pool.md) |
+| `configure()` + resources | Uma API key por processo; scripts; estilo legado |
+| `ClicksignClient` | Múltiplas keys; dependências explícitas; código novo |
+| `Services.use()` | Apps multi-tenant estilo Rails/Django/Celery (uma thread por requisição/job) |
+| `HttpxHTTPClient` (compartilhado) | Alto QPS por worker; veja [connection pool](docs/examples/12-http-connection-pool.md) |
 
-See [`docs/WORKFLOW.md`](docs/WORKFLOW.md) for a full signing workflow and [`docs/examples/`](docs/examples/) for scenario-specific recipes.
+Veja [`docs/WORKFLOW.md`](docs/WORKFLOW.md) para um fluxo completo de assinatura e [`docs/examples/`](docs/examples/) para receitas específicas por cenário.
 
 ---
 
-## Development
+## Desenvolvimento
 
 ```bash
 pip install -e ".[dev]"

@@ -1,6 +1,6 @@
 # Tipagem estática nos resources
 
-Este documento descreve como a SDK expõe tipos para resources e como evoluir o catálogo sem quebrar consumidores.
+Este documento descreve como o SDK expõe tipos para resources e como evoluir o catálogo sem quebrar consumidores.
 
 ## O que está tipado hoje
 
@@ -44,7 +44,7 @@ Membership.filter(**{"user.id": "uuid"})
 
 ## Fonte dos types
 
-Os TypedDicts vivem em `src/clicksign/types/resources.py`, gerados a partir de `scripts/resource_type_spec.json`:
+Os TypedDicts ficam em `src/clicksign/types/resources.py`, gerados a partir de `scripts/resource_type_spec.json`:
 
 ```bash
 python scripts/generate_resource_types.py
@@ -61,9 +61,9 @@ O spec é **manual incremental** (não há OpenAPI publicado no repositório). N
 | Campo removido | Manter no TypedDict como deprecated por 1 major, depois remover |
 | Resource novo | Adicionar entrada no spec + classe + export opcional no root |
 
-Regra prática: **TypedDicts só crescem em minors**; remoções ou renomeações só em major.
+Regra prática: **TypedDicts só crescem em minors**; remoções ou renomeações apenas em major.
 
-Atributos desconhecidos continuam acessíveis via `resource["custom_field"]` ou `__getattr__` em runtime — a tipagem cobre o subset documentado, não bloqueia campos extras da API.
+Atributos desconhecidos continuam acessíveis via `resource["custom_field"]` ou `__getattr__` em runtime — a tipagem cobre o subconjunto documentado, não bloqueia campos extras da API.
 
 ## Checagem estática (CI)
 
@@ -73,7 +73,7 @@ mypy
 pytest -q
 ```
 
-`pyproject.toml` usa `strict = true` nos módulos listados em `[tool.mypy] files`; resources tipados devem passar mypy sem `# type: ignore` desnecessários.
+`pyproject.toml` usa `strict = true` nos módulos listados em `[tool.mypy] files`; resources tipados devem passar no mypy sem `# type: ignore` desnecessários.
 
 ## Próximos passos (fora do §4)
 

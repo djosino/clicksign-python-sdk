@@ -1,55 +1,55 @@
-# Clicksign SDK Contract — Language-Agnostic Specification
+# Clicksign SDK Contract — Especificação Agnóstica de Linguagem
 
-**Version:** 1.0
-**Source:** Clicksign API v3 (JSON:API 1.1)
-**Reference implementation:** `../clicksign-ruby-sdk`
+**Versão:** 1.0
+**Fonte:** Clicksign API v3 (JSON:API 1.1)
+**Implementação de referência:** `../clicksign-ruby-sdk`
 
-This document defines the **complete behavioral contract** for any Clicksign SDK port.
-Implement every section exactly. When Python idioms differ from Ruby, prefer Python idioms
-but preserve the behavior.
+Este documento define o **contrato comportamental completo** para qualquer port do Clicksign SDK.
+Implemente cada seção exatamente como especificado. Quando os idiomas do Python diferirem do Ruby, prefira os idiomas do Python,
+mas preserve o comportamento.
 
 ---
 
-## 1. Authentication
+## 1. Autenticação
 
-- Header: `Authorization: <token>` — **NO** `Bearer` prefix, no `Token` prefix, raw token only
+- Header: `Authorization: <token>` — **SEM** prefixo `Bearer`, sem prefixo `Token`, token puro
 - Header: `Content-Type: application/vnd.api+json`
 - Header: `Accept: application/vnd.api+json`
-- Token comes from `Configuration.api_key`
+- Token vem de `Configuration.api_key`
 
-## 2. Base URLs
+## 2. URLs base
 
-| Environment | URL |
+| Ambiente | URL |
 |-------------|-----|
-| Production  | `https://app.clicksign.com/api/v3` |
+| Produção  | `https://app.clicksign.com/api/v3` |
 | Sandbox     | `https://sandbox.clicksign.com/api/v3` |
 
-Default: production. Shortcut: `config.environment = 'sandbox'` sets the URL automatically.
-Unknown environment string raises `ValueError` (or equivalent).
+Padrão: produção. Atalho: `config.environment = 'sandbox'` define a URL automaticamente.
+String de ambiente desconhecida lança `ValueError` (ou equivalente).
 
-## 3. Configuration
+## 3. Configuração
 
-Single configuration object, set once at startup. Attributes:
+Objeto de configuração único, definido uma vez na inicialização. Atributos:
 
-| Attribute | Type | Default | Description |
+| Atributo | Tipo | Padrão | Descrição |
 |-----------|------|---------|-------------|
-| `api_key` | str | None | API token |
-| `base_url` | str | production URL | Full base URL |
-| `open_timeout` | float | 2.0 | TCP connect timeout (seconds) |
-| `read_timeout` | float | 10.0 | Read timeout (seconds) |
-| `write_timeout` | float | 10.0 | Write timeout (seconds) |
-| `max_retries` | int | 3 | Retry attempts (0 = no retry) |
-| `logger` | Logger | None | Optional logger for callback errors |
+| `api_key` | str | None | Token da API |
+| `base_url` | str | URL de produção | URL base completa |
+| `open_timeout` | float | 2.0 | Timeout de conexão TCP (segundos) |
+| `read_timeout` | float | 10.0 | Timeout de leitura (segundos) |
+| `write_timeout` | float | 10.0 | Timeout de escrita (segundos) |
+| `max_retries` | int | 3 | Tentativas de retry (0 = sem retry) |
+| `logger` | Logger | None | Logger opcional para erros de callback |
 
-`environment=` shortcut sets `base_url` from the table above.
+O atalho `environment=` define `base_url` a partir da tabela acima.
 
-**Thread safety:** not safe for concurrent first access. Must be configured once before threads spawn.
+**Thread safety:** não é seguro para acesso concorrente inicial. Deve ser configurado uma vez antes de as threads serem criadas.
 
-## 4. Request / Response format
+## 4. Formato de Request / Response
 
-### Request body (POST, PATCH)
+### Corpo do request (POST, PATCH)
 
-JSON:API document:
+Documento JSON:API:
 
 ```json
 {
@@ -63,11 +63,11 @@ JSON:API document:
 }
 ```
 
-- Omit `id` on create
-- Omit `relationships` key when empty (not `"relationships": {}`)
-- Include `id` on update (PATCH)
+- Omita `id` na criação
+- Omita a chave `relationships` quando vazia (não `"relationships": {}`)
+- Inclua `id` na atualização (PATCH)
 
-### Response parsing
+### Parsing do response
 
 ```json
 {
@@ -78,12 +78,12 @@ JSON:API document:
 }
 ```
 
-- `data` may be a single object or an array
-- `included` entries without `type` must be filtered out (API bug workaround)
-- `links.next` drives pagination when present (null = last page)
-- Body may be empty (204 No Content) — return None
+- `data` pode ser um objeto único ou um array
+- Entradas de `included` sem `type` devem ser filtradas (contorno de bug da API)
+- `links.next` controla a paginação quando presente (null = última página)
+- O corpo pode ser vazio (204 No Content) — retorne None
 
-### Atomic operations (bulk)
+### Operações atômicas (bulk)
 
 ```json
 {
@@ -94,14 +94,14 @@ JSON:API document:
 }
 ```
 
-Response: `{ "atomic:results": [ ... ] }` — each slot maps to one operation.
-Top-level `errors` key → raise exception. Per-slot errors → return as result, do not raise.
+Response: `{ "atomic:results": [ ... ] }` — cada slot corresponde a uma operação.
+Chave `errors` no nível raiz → lança exceção. Erros por slot → retorna como resultado, não lança.
 
-## 5. Error hierarchy
+## 5. Hierarquia de erros
 
-Map HTTP status to exception. All inherit from a base `ClicksignError`:
+Mapeia status HTTP para exceção. Todos herdam de `ClicksignError` base:
 
-| HTTP status | Exception class | `retryable` |
+| Status HTTP | Classe de exceção | `retryable` |
 |-------------|-----------------|-------------|
 | 401, 403 | `AuthenticationError` | False |
 | 404 | `NotFoundError` | False |
@@ -109,50 +109,50 @@ Map HTTP status to exception. All inherit from a base `ClicksignError`:
 | 409 | `ConflictError` | False |
 | 429 | `RateLimitError` | **True** |
 | 5xx | `ServerError` | **True** |
-| Timeout / connection | `TimeoutError` | **True** |
+| Timeout / conexão | `TimeoutError` | **True** |
 
-Each exception exposes:
-- `message` — first `errors[].detail` or `errors[].title` from body, fallback to HTTP reason
-- `status_code` — integer HTTP status (None for timeout)
-- `request_id` — from `X-Request-Id` response header
-- `response_body` — raw response body string
-- `retryable` — bool property
+Cada exceção expõe:
+- `message` — primeiro `errors[].detail` ou `errors[].title` do corpo, fallback para o reason HTTP
+- `status_code` — status HTTP inteiro (None para timeout)
+- `request_id` — do header de response `X-Request-Id`
+- `response_body` — string do corpo bruto da response
+- `retryable` — propriedade bool
 
-`RateLimitError` additionally exposes:
-- `rate_limit_remaining` — from `X-RateLimit-Remaining` header
-- `rate_limit_reset` — from `X-RateLimit-Reset` header
+`RateLimitError` expõe adicionalmente:
+- `rate_limit_remaining` — do header `X-RateLimit-Remaining`
+- `rate_limit_reset` — do header `X-RateLimit-Reset`
 
-**Body extraction rules:**
-1. Empty/nil body → use HTTP reason phrase
-2. Body is valid JSON but not a dict (e.g., array) → use HTTP reason phrase
-3. `body["errors"][0]["detail"]` → use detail
-4. `body["errors"][0]["title"]` → use title as fallback
-5. JSON parse error → use HTTP reason phrase
+**Regras de extração do corpo:**
+1. Corpo vazio/nil → usa o reason phrase HTTP
+2. Corpo é JSON válido mas não é um dict (ex.: array) → usa o reason phrase HTTP
+3. `body["errors"][0]["detail"]` → usa detail
+4. `body["errors"][0]["title"]` → usa title como fallback
+5. Erro de parse JSON → usa o reason phrase HTTP
 
-## 6. Retry behavior
+## 6. Comportamento de retry
 
-Only `retryable=True` errors trigger retry. Non-retryable errors raise immediately.
+Apenas erros com `retryable=True` disparam retry. Erros não-retryable lançam imediatamente.
 
-**Backoff algorithm — full jitter:**
+**Algoritmo de backoff — full jitter:**
 
 ```
 ceiling(attempt) = min(0.5 * 2^(attempt-1), 30.0)
 delay(attempt)   = random(0, ceiling(attempt))   # uniform, not triangular
 ```
 
-- Attempt 1 → ceiling 0.5s
-- Attempt 2 → ceiling 1.0s
-- Attempt 3 → ceiling 2.0s
-- Capped at 30.0s
+- Tentativa 1 → ceiling 0.5s
+- Tentativa 2 → ceiling 1.0s
+- Tentativa 3 → ceiling 2.0s
+- Limitado a 30.0s
 
-`max_retries = N` means up to N retry attempts (N+1 total requests).
+`max_retries = N` significa até N tentativas de retry (N+1 requisições no total).
 
-**`BulkOperationsClient` retries only `TimeoutError`** — not `ServerError`. This is intentional:
-atomic operations are not idempotent by default.
+**`BulkOperationsClient` faz retry apenas em `TimeoutError`** — não em `ServerError`. Isso é intencional:
+operações atômicas não são idempotentes por padrão.
 
-## 7. Pagination
+## 7. Paginação
 
-### Auto-pagination (fetch all pages transparently)
+### Auto-paginação (busca todas as páginas de forma transparente)
 
 ```
 fetch_auto_pages(params):
@@ -169,12 +169,12 @@ fetch_auto_pages(params):
     page += 1
 ```
 
-**`links.next` takes priority.** The count heuristic is the fallback for APIs that omit `links`.
-When `links.next` is null, do NOT make another request even if `len(items) == per`.
+**`links.next` tem prioridade.** A heurística de contagem é o fallback para APIs que omitem `links`.
+Quando `links.next` é null, NÃO faça outra requisição mesmo que `len(items) == per`.
 
 ### Query chain
 
-Chainable builder accumulating params before executing:
+Builder encadeável que acumula parâmetros antes de executar:
 
 ```python
 Resource.filter(status='running') \
@@ -185,53 +185,53 @@ Resource.filter(status='running') \
         .to_list()   # executes
 ```
 
-Methods: `filter(**kw)`, `order(field)`, `page(n)`, `per(n)` (max 50 — see `pagination.MAX_PAGE_SIZE`), `with_includes(*types)`, `fields(**types)`, `on_page(callback)`
+Métodos: `filter(**kw)`, `order(field)`, `page(n)`, `per(n)` (máx 50 — veja `pagination.MAX_PAGE_SIZE`), `with_includes(*types)`, `fields(**types)`, `on_page(callback)`
 
-See [`PAGINATION.md`](PAGINATION.md) for `last_response` / `page_responses` per page and `links.next` vs. count heuristic.
+Veja [`PAGINATION.md`](PAGINATION.md) para `last_response` / `page_responses` por página e heurística `links.next` vs. contagem.
 
-`with_includes` validates: types must be str, raises `ValueError` if empty or wrong type.
+`with_includes` valida: os tipos devem ser str, lança `ValueError` se vazio ou tipo errado.
 
-`include` (if exposed) must handle both module mixing (language-appropriate) and JSON:API types.
+`include` (se exposto) deve tratar tanto module mixing (conforme o idioma da linguagem) quanto tipos JSON:API.
 
-## 8. Resource base class
+## 8. Classe base de resource
 
-### Class methods
+### Métodos de classe
 
-| Method | HTTP | Description |
+| Método | HTTP | Descrição |
 |--------|------|-------------|
-| `list()` | GET `/resources` | No args, eager list |
-| `filter(**kw)` | — | Returns QueryProxy |
-| `retrieve(id)` | GET `/resources/:id` | Single object |
-| `create(**attrs)` | POST `/resources` | Returns new instance |
+| `list()` | GET `/resources` | Sem argumentos, lista eager |
+| `filter(**kw)` | — | Retorna QueryProxy |
+| `retrieve(id)` | GET `/resources/:id` | Objeto único |
+| `create(**attrs)` | POST `/resources` | Retorna nova instância |
 
-### Instance methods
+### Métodos de instância
 
-| Method | HTTP | Description |
+| Método | HTTP | Descrição |
 |--------|------|-------------|
-| `update(**attrs)` | PATCH `/resources/:id` | Mutates and returns self |
-| `delete()` | DELETE `/resources/:id` | Returns None |
-| `reload()` | GET `/resources/:id` | Refreshes from API |
+| `update(**attrs)` | PATCH `/resources/:id` | Muta e retorna self |
+| `delete()` | DELETE `/resources/:id` | Retorna None |
+| `reload()` | GET `/resources/:id` | Atualiza a partir da API |
 
-### Dynamic attribute access
+### Acesso dinâmico a atributos
 
-Attributes from `data.attributes` accessible as properties:
+Atributos de `data.attributes` acessíveis como propriedades:
 ```python
 envelope.name    # → str
 envelope.status  # → str
 envelope['name'] # → equivalent via __getitem__
 ```
 
-Unknown attribute → `AttributeError` (not silent None).
+Atributo desconhecido → `AttributeError` (não None silencioso).
 
-### Nested resources
+### Resources aninhados
 
 `nested_list(parent_id, nested_type, as_class=None, params={})` → GET `/{endpoint}/{parent_id}/{nested_type}`
 
-Parent ID stored in `_parent_id` so `update`/`delete`/`reload` build correct nested URL.
+ID do pai armazenado em `_parent_id` para que `update`/`delete`/`reload` construam a URL aninhada correta.
 
-## 9. Instrumentation
+## 9. Instrumentação
 
-Three events, published before raising any exception:
+Três eventos, publicados antes de lançar qualquer exceção:
 
 ```python
 # Event payloads (dicts):
@@ -259,10 +259,10 @@ error_event = {
 }
 ```
 
-Callbacks must be isolated — exceptions in callbacks must never propagate to the caller.
-If `config.logger` is set, log callback errors via `logger.warning(...)`. Otherwise silent.
+Callbacks devem ser isolados — exceções em callbacks nunca devem se propagar para o chamador.
+Se `config.logger` estiver definido, registre erros de callback via `logger.warning(...)`. Caso contrário, silencioso.
 
-Registration API:
+API de registro:
 ```python
 Clicksign.on_request(callback)
 Clicksign.on_retry(callback)
@@ -270,25 +270,25 @@ Clicksign.on_error(callback)
 Clicksign.instrumentation.clear()   # for tests
 ```
 
-## 10. Resource namespacing
+## 10. Namespacing de resources
 
-| Namespace | Module path | Resources |
+| Namespace | Caminho do módulo | Resources |
 |-----------|-------------|-----------|
 | Notarial | `clicksign.resources.notarial` | Envelope, Document, Signer, Requirement, BulkRequirement, SignatureWatcher, Event |
 | AutoSignature | `clicksign.resources.auto_signature` | Term |
 | AcceptanceTerm | `clicksign.resources.acceptance_term` | Whatsapp |
 | Root | `clicksign.resources` | Webhook, User, Membership, Group, Folder, Template, TemplateField, AccessControlList, EnvelopeBulkCreation |
 
-## 11. Thread / async safety
+## 11. Segurança de thread / async
 
-- Single global configuration — not safe for concurrent mutation
-- Thread-local client: `Services.use(api_key, base_url)` context manager sets client for current thread only
-- Async: use `AsyncClicksignClient` / `AsyncClient` (`pip install clicksign[async]`). Do not rely on `Services.use()` under asyncio; pass an explicit async client per app/coroutine scope
-- Instance updates in async flows: `update_async`, `delete_async`, `reload_async` on resources returned by the async client
+- Configuração global única — não é segura para mutação concorrente
+- Cliente thread-local: context manager `Services.use(api_key, base_url)` define o cliente apenas para a thread atual
+- Async: use `AsyncClicksignClient` / `AsyncClient` (`pip install clicksign[async]`). Não dependa de `Services.use()` sob asyncio; passe um cliente async explícito por escopo de app/coroutine
+- Atualizações de instância em fluxos async: `update_async`, `delete_async`, `reload_async` nos resources retornados pelo cliente async
 
-## 12. Webhook validation
+## 12. Validação de webhook
 
-HMAC-SHA256 constant-time comparison:
+Comparação em tempo constante HMAC-SHA256:
 
 ```python
 import hmac, hashlib
@@ -300,25 +300,25 @@ def verify_signature(payload: bytes, signature: str, secret: str) -> bool:
     return hmac.compare_digest(expected, signature)
 ```
 
-`WebhookSignatureError` raised on mismatch.
+`WebhookSignatureError` lançado em caso de divergência.
 
 ---
 
-## Checklist — "done" per module
+## Checklist — "concluído" por módulo
 
-- [ ] Configuration with all attributes and `environment=` shortcut
-- [ ] HTTP client with timeouts, auth headers, JSON:API headers
-- [ ] Error hierarchy with `retryable`, `status_code`, `request_id`
-- [ ] `ErrorHandler` with all body-extraction rules
-- [ ] `RetryBackoff` with full jitter, tested deterministically with seeded RNG
-- [ ] `JsonApiSerializer` — produces correct body for create/update/no-relationships
-- [ ] `JsonApiParser` — handles single/array data, filters `included` without `type`
-- [ ] `QueryBuilder` — all chain methods, `to_params()` output verified
-- [ ] `Resource` base — all CRUD, dynamic attributes, `__getitem__`, nested list
-- [ ] `QueryProxy` — all chain methods return proxy; `to_list`, `first`, `last`, `count`, auto-paging
-- [ ] `Instrumentation` — all 3 events, callback isolation, logger integration
-- [ ] `BulkOperationsClient` — atomic ops, per-slot results, timeout-only retry, instrumentation
-- [ ] `Services` — thread-local context manager
-- [ ] `Webhook` — constant-time HMAC verification
-- [ ] All resources implemented per SPEC.md
-- [ ] All spec behaviors from SDK_TEST_MATRIX.md covered
+- [ ] Configuration com todos os atributos e atalho `environment=`
+- [ ] Cliente HTTP com timeouts, headers de autenticação, headers JSON:API
+- [ ] Hierarquia de erros com `retryable`, `status_code`, `request_id`
+- [ ] `ErrorHandler` com todas as regras de extração do corpo
+- [ ] `RetryBackoff` com full jitter, testado deterministicamente com RNG com seed
+- [ ] `JsonApiSerializer` — produz corpo correto para create/update/sem-relacionamentos
+- [ ] `JsonApiParser` — trata data único/array, filtra `included` sem `type`
+- [ ] `QueryBuilder` — todos os métodos de chain, saída de `to_params()` verificada
+- [ ] `Resource` base — todos os CRUD, atributos dinâmicos, `__getitem__`, nested list
+- [ ] `QueryProxy` — todos os métodos de chain retornam proxy; `to_list`, `first`, `last`, `count`, auto-paging
+- [ ] `Instrumentation` — todos os 3 eventos, isolamento de callback, integração com logger
+- [ ] `BulkOperationsClient` — atomic ops, resultados por slot, retry apenas em timeout, instrumentação
+- [ ] `Services` — context manager thread-local
+- [ ] `Webhook` — verificação HMAC em tempo constante
+- [ ] Todos os resources implementados conforme SPEC.md
+- [ ] Todos os comportamentos de spec do SDK_TEST_MATRIX.md cobertos

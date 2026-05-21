@@ -8,12 +8,12 @@ Cada item deve ter teste em `tests/clicksign/`. Marque `[x]` quando coberto.
 
 ---
 
-## Configuration — `test_configuration.py`
+## Configuração — `test_configuration.py`
 
 - [x] Defaults: production base_url, open/read/write timeouts, `max_retries=3`, logger=None
 - [x] `environment='sandbox'` / `'production'`
-- [x] Unknown environment raises ValueError
-- [x] Accepts a logger object
+- [x] Ambiente desconhecido levanta ValueError
+- [x] Aceita um objeto logger
 
 ---
 
@@ -27,11 +27,11 @@ Cada item deve ter teste em `tests/clicksign/`. Marque `[x]` quando coberto.
 
 ---
 
-## Error handler — `test_error_handler.py`, `test_errors.py`, `test_structured_errors.py`
+## Tratamento de erros — `test_error_handler.py`, `test_errors.py`, `test_structured_errors.py`
 
 - [x] Mapeamento 401, 403, 404, 400, 422, 409, 429, 5xx
 - [x] Body não-JSON, array JSON, title sem detail, body vazio
-- [x] `status_code`, `request_id`, rate limit headers em 429
+- [x] `status_code`, `request_id`, headers de rate limit em 429
 - [x] `retryable` True/False por tipo
 
 ---
@@ -39,10 +39,10 @@ Cada item deve ter teste em `tests/clicksign/`. Marque `[x]` quando coberto.
 ## Retry — `test_client.py`, `test_request_options.py`
 
 - [x] `max_retries=0` → uma tentativa
-- [x] Retry 500, 429, TimeoutError; não retry 422
+- [x] Retry em 500, 429, TimeoutError; sem retry em 422
 - [x] Esgota após N retries; backoff com jitter
 - [x] 429 com header `Retry-After` (`test_retry_backoff.py`)
-- [x] `RequestOptions.max_retries` override (`test_request_options.py`)
+- [x] Override de `RequestOptions.max_retries` (`test_request_options.py`)
 
 ---
 
@@ -54,39 +54,39 @@ Cada item deve ter teste em `tests/clicksign/`. Marque `[x]` quando coberto.
 
 ## JsonApiSerializer / Parser — `test_json_api_serializer.py`, `test_json_api_parser.py`
 
-- [x] Create/update payload rules
-- [x] Parse single/array/empty, included, filter sem `type`
+- [x] Regras de payload para create/update
+- [x] Parse de single/array/empty, included, filtro sem `type`
 
 ---
 
 ## QueryBuilder — `test_query_builder.py`
 
-- [x] filter, order, page, per (max 50), includes, fields, chain
+- [x] filter, order, page, per (máx 50), includes, fields, chain
 - [x] `per` acima do máximo levanta ValueError
 
 ---
 
-## Resource / QueryProxy / pagination — `test_resource.py`, `test_pagination.py`, `test_last_response.py`
+## Resource / QueryProxy / paginação — `test_resource.py`, `test_pagination.py`, `test_last_response.py`
 
-- [x] CRUD, dynamic attrs, QueryProxy chain
-- [x] Auto-pagination: `links.next`, heurística, página cheia extra
-- [x] `QueryProxy.last_response` por página; `on_page` callback
+- [x] CRUD, atributos dinâmicos, chain de QueryProxy
+- [x] Auto-paginação: `links.next`, heurística, página cheia extra
+- [x] `QueryProxy.last_response` por página; callback `on_page`
 - [x] `page_responses` lista metadados
 
 ---
 
 ## Instrumentation — `test_instrumentation.py`, `test_client.py`
 
-- [x] request / retry / error events
-- [x] Callback exception não propaga; `clear()` no `conftest`
+- [x] Eventos de request / retry / error
+- [x] Exceção em callback não propaga; `clear()` no `conftest`
 - [x] `on_request`, `on_retry`, `on_error` no pacote raiz
 
 ---
 
 ## BulkOperationsClient — `test_bulk_operations_client.py`
 
-- [x] Headers, POST JSON, parse `atomic:results`
-- [x] Retry só TimeoutError; **não** retry 500
+- [x] Headers, POST JSON, parse de `atomic:results`
+- [x] Retry apenas em TimeoutError; **sem** retry em 500
 - [x] Instrumentation
 
 ---
@@ -94,43 +94,43 @@ Cada item deve ter teste em `tests/clicksign/`. Marque `[x]` quando coberto.
 ## Services — `test_services.py`
 
 - [x] `use()` isola client; restaura após bloco e exceção
-- [x] Unknown environment
+- [x] Ambiente desconhecido
 
 ---
 
 ## Webhook — `test_webhook.py`
 
-- [x] `verify_signature`, `construct_event`, constant-time compare
+- [x] `verify_signature`, `construct_event`, comparação em tempo constante
 
 ---
 
 ## ClicksignClient / raw — `test_clicksign_client.py`, `test_raw_request.py`
 
-- [x] Facade namespaces, `raw_request`, `deserialize`, `last_response`
+- [x] Namespaces da facade, `raw_request`, `deserialize`, `last_response`
 
 ---
 
 ## Async — `test_async_client.py`, `test_async_clicksign_client.py`
 
-- [x] AsyncClient HTTP; AsyncClicksignClient resources e paginação
+- [x] HTTP do AsyncClient; resources e paginação do AsyncClicksignClient
 
 ---
 
-## Logging / UA / telemetry — `test_log.py`, `test_user_agent.py`, `test_provider_telemetry.py`
+## Logging / UA / telemetria — `test_log.py`, `test_user_agent.py`, `test_provider_telemetry.py`
 
-- [x] `CLICKSIGN_LOG`, redação de Authorization
+- [x] `CLICKSIGN_LOG`, redação do header Authorization
 - [x] User-Agent + `set_app_info`
 - [x] Telemetria opt-in
 
 ---
 
-## Request headers — `test_request_options.py`
+## Headers de request — `test_request_options.py`
 
-- [x] `correlation_id()` → `X-Correlation-Id` merged
+- [x] `correlation_id()` → `X-Correlation-Id` mesclado
 
 ---
 
-## Resource specs — `tests/clicksign/resources/`
+## Specs de resource — `tests/clicksign/resources/`
 
 Cobertura por resource (CRUD, filter, erros 404/422 onde aplicável):
 
@@ -142,11 +142,11 @@ Adicionar testes ao criar novos métodos (ver [`SPEC.md`](SPEC.md) e esta matriz
 
 ---
 
-## Bulk vs Client retry (documentado + testado)
+## Retry Bulk vs Client (documentado + testado)
 
 | Política | Teste |
 |----------|--------|
 | Client retenta 429/5xx/timeout | `test_client.py` |
-| Bulk retenta só timeout | `test_bulk_operations_client.py` (`test_does_not_retry_on_server_error`) |
+| Bulk retenta apenas timeout | `test_bulk_operations_client.py` (`test_does_not_retry_on_server_error`) |
 
 Ver [`examples/01-retries.md`](examples/01-retries.md).
