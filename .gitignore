@@ -16,3 +16,5 @@ htmlcov/
 .claude/
 .idea/
 docs/CONSIDERACOES.md
+scripts/sandbox/.env
+scripts/sandbox/.last_run.json

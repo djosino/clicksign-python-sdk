@@ -24,11 +24,7 @@ async def test_async_bound_filter_chain_first(
 ):
     fake._queue = [http_response(200, collection("envelopes"))]
     item = await (
-        client.notarial.envelopes.filter(status="draft")
-        .page(2)
-        .per(15)
-        .order("name")
-        .first()
+        client.notarial.envelopes.filter(status="draft").page(2).per(15).order("name").first()
     )
     assert item is not None
     url = fake.calls[0]["url"]
