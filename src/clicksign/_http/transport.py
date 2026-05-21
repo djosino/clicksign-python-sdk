@@ -193,7 +193,8 @@ class HttpxHTTPClient:
             import httpx
         except ImportError as exc:
             raise ImportError(
-                "httpx is required for HttpxHTTPClient. Install with: pip install clicksign-python-sdk[httpx]"
+                "httpx is required for HttpxHTTPClient. "
+                "Install with: pip install clicksign-python-sdk[httpx]"
             ) from exc
         self._client = httpx.Client(
             proxy=proxy,
@@ -308,7 +309,8 @@ class HttpxAsyncHTTPClient:
             import httpx
         except ImportError as exc:
             raise ImportError(
-                "httpx is required for async HTTP. Install with: pip install clicksign-python-sdk[async]"
+                "httpx is required for async HTTP. "
+                "Install with: pip install clicksign-python-sdk[async]"
             ) from exc
         self._client = httpx.AsyncClient(
             proxy=proxy,
