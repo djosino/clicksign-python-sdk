@@ -32,6 +32,7 @@ class Resource:
     endpoint: str | None = None
     _base_path: str | None = None
     _parent_id: str | None = None
+    _bound_client: Any = None
 
     def __init__(self, data: dict[str, Any]) -> None:
         self._data = data
@@ -42,7 +43,7 @@ class Resource:
         index = getattr(self, "_included_index", None)
         if index is None:
             return []
-        return index.to_resources()
+        return index.to_resources()  # type: ignore[no-any-return]
 
     @classmethod
     def _get_resource_type(cls) -> str:
@@ -151,13 +152,13 @@ class Resource:
             self._resolved_relationships[name] = None
             return None
         if isinstance(data, list):
-            resolved = [self._resolve_resource_ref(ref) for ref in data]
-            self._resolved_relationships[name] = resolved
-            return resolved
+            resolved_list = [self._resolve_resource_ref(ref) for ref in data]
+            self._resolved_relationships[name] = resolved_list
+            return resolved_list
 
-        resolved = self._resolve_resource_ref(data)
-        self._resolved_relationships[name] = resolved
-        return resolved
+        resolved_single = self._resolve_resource_ref(data)
+        self._resolved_relationships[name] = resolved_single
+        return resolved_single
 
     def _resolve_resource_ref(self, ref: dict[str, Any]) -> Resource | None:
         resource_type = ref.get("type")
@@ -492,7 +493,7 @@ class QueryProxy(Generic[TResource]):
             if self._on_page is not None:
                 self._on_page(page, self._last_response, instances)  # type: ignore[arg-type]
 
-            yield from instances
+            yield from instances  # type: ignore[misc]
 
             if not has_next_page(parsed, len(instances), per):
                 break

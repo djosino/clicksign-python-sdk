@@ -14,11 +14,11 @@ class Term(Resource):
         raise NotImplementedError("AutoSignature::Term does not support list")
 
     @classmethod
-    def retrieve(cls, resource_id: str) -> Term:
+    def retrieve(cls, resource_id: str, *, options: Any = None) -> Term:
         raise NotImplementedError("AutoSignature::Term does not support retrieve")
 
     def update(self, **attrs: Any) -> Term:  # type: ignore[override]
         raise NotImplementedError("AutoSignature::Term does not support update")
 
-    def delete(self) -> None:
+    def delete(self, *, options: Any = None) -> None:
         raise NotImplementedError("AutoSignature::Term does not support delete")

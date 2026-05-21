@@ -197,4 +197,4 @@ class BulkOperationsClient(RequestInstrumentation):
             provider_telemetry=self._provider_telemetry,
         )
         self._last_response = result.metadata
-        return result.data
+        return result.data  # type: ignore[no-any-return]

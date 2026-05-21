@@ -44,6 +44,15 @@ python_version = "3.10"
 strict = true
 files = [
     "src/clicksign/types",
+    "src/clicksign/resource.py",
+    "src/clicksign/bound_resource.py",
+    "src/clicksign/client_scope.py",
+    "src/clicksign/_http/transport.py",
+    "src/clicksign/_async/bound_resource.py",
+    "src/clicksign/json_api/bulk_operations_client.py",
+    "src/clicksign/resources/envelope_bulk_creation.py",
+    "src/clicksign/resources/auto_signature/term.py",
+    "src/clicksign/resources/acceptance_term/whatsapp.py",
     "src/clicksign/resources/notarial/envelope.py",
     "src/clicksign/resources/notarial/document.py",
     "src/clicksign/resources/notarial/signer.py",
