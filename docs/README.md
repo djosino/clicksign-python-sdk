@@ -49,6 +49,7 @@
 | [`examples/10-observability-opentelemetry.md`](examples/10-observability-opentelemetry.md) | OpenTelemetry manual |
 | [`examples/11-observability-metrics.md`](examples/11-observability-metrics.md) | Prometheus / StatsD |
 | [`examples/12-http-connection-pool.md`](examples/12-http-connection-pool.md) | `HttpxHTTPClient` singleton |
+| [`examples/13-async-fastapi.md`](examples/13-async-fastapi.md) | FastAPI, lifespan, fluxo notarial async |
 
 Índice do examples: [`examples/README.md`](examples/README.md).
 

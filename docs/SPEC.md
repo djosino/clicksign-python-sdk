@@ -144,6 +144,16 @@ Import direto: `from clicksign import Envelope, Document, Signer` (notarial expo
 - `Envelope.list_events(envelope_id, **filters)`
 - `Envelope.list_documents` / `list_signers` / `list_requirements` / `list_signature_watchers`
 - `envelope.notify(message=..., subject=...)`
+- `Signer.notify(envelope_id, signer_id, message=..., subject=...)` — classmethod; ids obrigatórios
+
+**Listagens equivalentes** (mesma rota HTTP; escolha por estilo):
+
+| Recurso | Via envelope | Via resource |
+|---------|--------------|--------------|
+| Signatários | `Envelope.list_signers(envelope_id)` | `Signer.list_for_envelope(envelope_id)` |
+| Documentos | `Envelope.list_documents(envelope_id)` | `Document.list_for_envelope(envelope_id)` |
+
+Detalhes e paginação: [`PAGINATION.md`](PAGINATION.md).
 
 ---
 

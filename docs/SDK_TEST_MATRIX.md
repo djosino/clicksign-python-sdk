@@ -110,9 +110,12 @@ Cada item deve ter teste em `tests/clicksign/`. Marque `[x]` quando coberto.
 
 ---
 
-## Async — `test_async_client.py`, `test_async_clicksign_client.py`
+## Async — `test_async_client.py`, `test_async_clicksign_client.py`, `test_async_http_executor.py`, `test_httpx_async_transport.py`
 
 - [x] HTTP do AsyncClient; resources e paginação do AsyncClicksignClient
+- [x] Retry 429/422/timeout no AsyncClient (`test_async_client.py`)
+- [x] `execute_async_http_request` — sucesso, retry 429/timeout, sem retry 422 (`test_async_http_executor.py`)
+- [x] `HttpxAsyncHTTPClient` — import guard, delegação, status error, `aclose` (`test_httpx_async_transport.py`)
 
 ---
 
@@ -137,6 +140,25 @@ Cobertura por resource (CRUD, filter, erros 404/422 onde aplicável):
 - [x] Notarial: envelope, document, signer, requirement, signature_watcher, bulk_requirement, event
 - [x] Admin: user, template, template_field, membership, group, folder, webhook
 - [x] Parcial: acceptance_term, auto_signature, access_control_list, envelope_bulk_creation (conforme métodos expostos)
+
+### Notarial — métodos aninhados e notify
+
+- [x] `Envelope.list_documents` / `list_signers` / `list_requirements` / `list_signature_watchers` (`test_envelope.py`)
+- [x] `Envelope.activate` (classe) (`test_envelope.py`)
+- [x] `Envelope.notify` (`test_envelope.py`)
+- [x] `Signer.notify(envelope_id, signer_id, ...)` — classmethod com ids explícitos (`test_signer.py`)
+- [x] Facade `documents.create` / `signers.create` com envelope id posicional (`test_clicksign_client.py`)
+- [x] Facade `signers.notify` / `envelopes.notify` (`test_clicksign_client.py`)
+- [x] `Requirement.list_for_document` / `list_for_signer` com filtros (`test_requirement.py`)
+- [x] `Envelope.list_requirements` com `QueryBuilder` (`test_envelope.py`)
+
+### Infraestrutura — `test_json_api_operations.py`, `test_bound_resource.py`, `test_async_bound_resource.py`, `test_httpx_transport.py`, `test_httpx_async_transport.py`, `test_types_attrs.py`
+
+- [x] `BulkRequirementOperations` (agree, evidence, rubricate, remove, payload)
+- [x] `BoundQueryProxy` sync: includes, fields, count, last, iter, on_page, page/per/order
+- [x] `AsyncBoundQueryProxy`: filter chain, includes, count, page/per
+- [x] `HttpxHTTPClient` / `HttpxAsyncHTTPClient`: owned timeout, status 4xx/5xx, exceções httpx
+- [x] `types._attrs` helpers
 
 Adicionar testes ao criar novos métodos (ver [`SPEC.md`](SPEC.md) e esta matriz).
 

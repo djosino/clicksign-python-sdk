@@ -161,8 +161,10 @@ envelope.notify(message="Seu contrato está disponível para assinatura.")
 ### Um signatário
 
 ```python
-signer.notify(message="Lembrete: seu documento aguarda assinatura.")
-signer.notify(
+Signer.notify(envelope.id, signer.id, message="Lembrete: seu documento aguarda assinatura.")
+Signer.notify(
+    envelope.id,
+    signer.id,
     message="Por favor, assine até sexta-feira.",
     subject="Ação necessária: assinatura pendente",
 )
@@ -203,7 +205,7 @@ Requirement.create(envelope.id, signer_id=signer.id, document_id=document.id, ac
 envelope.update(status="running")
 
 # 6. Notificar
-signer.notify(message="Seu contrato ACME está disponível para assinatura.")
+Signer.notify(envelope.id, signer.id, message="Seu contrato ACME está disponível para assinatura.")
 
 print(f"Envelope {envelope.id} ativo e signatário notificado.")
 ```

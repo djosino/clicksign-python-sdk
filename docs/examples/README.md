@@ -14,6 +14,7 @@ Receitas curtas por cenário em Python. Fluxo completo de assinatura: [`WORKFLOW
 | [Observabilidade — OpenTelemetry](10-observability-opentelemetry.md) | Spans manuais por request/erro |
 | [Observabilidade — métricas](11-observability-metrics.md) | Prometheus / StatsD via hooks |
 | [HTTP — connection pool](12-http-connection-pool.md) | `HttpxHTTPClient` singleton por worker |
+| [FastAPI / asyncio](13-async-fastapi.md) | `AsyncClicksignClient`, lifespan, fluxo notarial |
 
 **Fluxo completo de assinatura:** [`WORKFLOW.md`](../WORKFLOW.md).
 
