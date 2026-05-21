@@ -1,4 +1,5 @@
 import json
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -65,6 +66,31 @@ async def test_retries_on_timeout():
     client = make_client(max_retries=1, http_client=fake)
     await client.get("/envelopes")
     assert len(fake.calls) == 2
+
+
+@pytest.mark.asyncio
+async def test_retries_on_429_and_succeeds():
+    from tests.support.fake_http_client import http_error
+
+    fake = FakeAsyncHTTPClient(
+        http_error(429, ""),
+        http_response(200, {"data": []}),
+    )
+    with patch("clicksign._async.http_executor.asyncio.sleep", new_callable=AsyncMock):
+        with patch("clicksign.retry_backoff.delay", return_value=0):
+            await make_client(max_retries=1, http_client=fake).get("/envelopes")
+    assert len(fake.calls) == 2
+
+
+@pytest.mark.asyncio
+async def test_does_not_retry_on_422():
+    from clicksign.errors import ValidationError
+    from tests.support.fake_http_client import http_error
+
+    fake = FakeAsyncHTTPClient(http_error(422, {"errors": [{"detail": "bad"}]}))
+    with pytest.raises(ValidationError):
+        await make_client(max_retries=2, http_client=fake).post("/envelopes", {})
+    assert len(fake.calls) == 1
 
 
 @pytest.mark.asyncio

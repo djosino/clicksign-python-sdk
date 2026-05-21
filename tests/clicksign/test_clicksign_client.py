@@ -173,3 +173,54 @@ def test_deserialize_on_facade(client: ClicksignClient):
         envelope = client.deserialize(raw, Envelope)
     assert envelope.id == UUID
     assert envelope.last_response is not None
+
+
+def test_facade_documents_create_uses_envelope_id_in_path(client: ClicksignClient):
+    from tests.support.json_api_fixtures import document_response
+
+    captured: dict[str, Any] = {}
+    with mock_urlopen(make_response(201, document_response()), capture=captured):
+        client.notarial.documents.create(
+            ENV_ID,
+            filename="a.pdf",
+            content_base64="data:application/pdf;base64,abc",
+        )
+    assert captured["method"] == "POST"
+    assert f"/envelopes/{ENV_ID}/documents" in captured["url"]
+
+
+def test_facade_signers_create_uses_envelope_id_in_path(client: ClicksignClient):
+    from tests.support.json_api_fixtures import signer_response
+
+    captured: dict[str, Any] = {}
+    with mock_urlopen(make_response(201, signer_response()), capture=captured):
+        client.notarial.signers.create(ENV_ID, name="Alice", email="alice@example.com")
+    assert captured["method"] == "POST"
+    assert f"/envelopes/{ENV_ID}/signers" in captured["url"]
+
+
+def test_facade_signers_notify(client: ClicksignClient):
+    captured: dict[str, Any] = {}
+    with mock_urlopen(make_response(201, {}), capture=captured):
+        client.notarial.signers.notify(ENV_ID, SIG_ID, message="Assine o documento")
+    assert captured["method"] == "POST"
+    assert f"/envelopes/{ENV_ID}/signers/{SIG_ID}/notifications" in captured["url"]
+
+
+def test_facade_envelopes_notify(client: ClicksignClient):
+    captured: dict[str, Any] = {}
+    with mock_urlopen(
+        make_response(200, envelope_response()),
+        make_response(204, None),
+        capture=captured,
+    ):
+        client.notarial.envelopes.retrieve(UUID).notify(message="Todos assinem")
+    assert captured["method"] == "POST"
+    assert captured["url"].endswith(f"/envelopes/{UUID}/notifications")
+
+
+def test_facade_signers_notify_with_subject(client: ClicksignClient):
+    captured: dict[str, Any] = {}
+    with mock_urlopen(make_response(201, {}), capture=captured):
+        client.notarial.signers.notify(ENV_ID, SIG_ID, message="Assine", subject="Ação necessária")
+    assert captured["body"]["data"]["attributes"]["subject"] == "Ação necessária"
