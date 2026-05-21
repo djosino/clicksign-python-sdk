@@ -2,7 +2,7 @@
 
 **Versão:** 1.0
 **Fonte:** Clicksign API v3 (JSON:API 1.1)
-**Implementação:** este repositório (`clicksign` no PyPI)
+**Implementação:** este repositório (`clicksign-python-sdk` no PyPI; import `clicksign`)
 
 Este documento define o **contrato comportamental** do SDK Python. Implementações em outras linguagens devem preservar o mesmo comportamento observável (HTTP, retry, erros, bulk, paginação).
 Mapa de classes e rotas: [`SPEC.md`](SPEC.md).
@@ -284,7 +284,7 @@ Clicksign.instrumentation.clear()   # for tests
 
 - Configuração global única — não é segura para mutação concorrente
 - Cliente thread-local: context manager `Services.use(api_key, base_url)` define o cliente apenas para a thread atual
-- Async: use `AsyncClicksignClient` / `AsyncClient` (`pip install clicksign[async]`). Não dependa de `Services.use()` sob asyncio; passe um cliente async explícito por escopo de app/coroutine
+- Async: use `AsyncClicksignClient` / `AsyncClient` (`pip install clicksign-python-sdk[async]`). Não dependa de `Services.use()` sob asyncio; passe um cliente async explícito por escopo de app/coroutine
 - Atualizações de instância em fluxos async: `update_async`, `delete_async`, `reload_async` nos resources retornados pelo cliente async
 
 ## 12. Validação de webhook

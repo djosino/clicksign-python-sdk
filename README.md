@@ -1,9 +1,12 @@
 # Clicksign Python SDK
 
-[![PyPI](https://img.shields.io/pypi/v/clicksign)](https://pypi.org/project/clicksign/)
-[![CI](https://github.com/djosino/clicksign-python-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/djosino/clicksign-python-sdk/actions)
-[![Python](https://img.shields.io/pypi/pyversions/clicksign)](https://pypi.org/project/clicksign/)
-[![License](https://img.shields.io/pypi/l/clicksign)](LICENSE)
+[![versão](https://img.shields.io/badge/versão-0.1.0-0066cc?style=flat-square)](CHANGELOG.md#010---2026-05-21)
+[![CI](https://github.com/djosino/clicksign-python-sdk/actions/workflows/ci.yml/badge.svg?branch=main&style=flat-square)](https://github.com/djosino/clicksign-python-sdk/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-3776AB?style=flat-square&logo=python&logoColor=white)](https://github.com/djosino/clicksign-python-sdk/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/badge/PyPI-em%20breve-9cf?style=flat-square)](https://pypi.org/project/clicksign-python-sdk/)
+[![licença](https://img.shields.io/github/license/djosino/clicksign-python-sdk?style=flat-square&label=licença)](LICENSE)
+[![documentação](https://img.shields.io/badge/documentação-pt--BR-2563eb?style=flat-square)](docs/)
+[![API v3](https://img.shields.io/badge/Clicksign-API%20v3-00a86b?style=flat-square)](https://developers.clicksign.com/)
 
 Cliente Python para a [Clicksign API v3](https://developers.clicksign.com/) (JSON:API). Requer Python >= 3.10, sem dependências de runtime (apenas stdlib). Documentação detalhada em [`docs/`](docs/).
 
@@ -41,14 +44,16 @@ Cliente Python para a [Clicksign API v3](https://developers.clicksign.com/) (JSO
 ## Instalação
 
 ```bash
-pip install clicksign
+pip install clicksign-python-sdk
 ```
+
+O módulo importado continua sendo `clicksign` (`import clicksign`).
 
 Extras opcionais:
 
 ```bash
-pip install clicksign[httpx]   # connection pooling (alto QPS)
-pip install clicksign[async]   # AsyncClicksignClient (requer httpx)
+pip install clicksign-python-sdk[httpx]   # connection pooling (alto QPS)
+pip install clicksign-python-sdk[async]   # AsyncClicksignClient (requer httpx)
 ```
 
 ---
@@ -443,7 +448,7 @@ client = ClicksignClient(api_key="...", environment="production")
 
 ## Async (FastAPI, asyncio)
 
-Requer `pip install clicksign[async]`. Receita completa: [`docs/examples/13-async-fastapi.md`](docs/examples/13-async-fastapi.md).
+Requer `pip install clicksign-python-sdk[async]`. Receita completa: [`docs/examples/13-async-fastapi.md`](docs/examples/13-async-fastapi.md).
 
 ```python
 import asyncio
@@ -470,7 +475,7 @@ asyncio.run(main())
 
 **Padrão:** `UrllibHTTPClient` (stdlib, sem connection pool — um handshake TCP/TLS por requisição). Adequado para scripts e baixo QPS.
 
-**Alto QPS:** instale `clicksign[httpx]` e injete um cliente compartilhado:
+**Alto QPS:** instale `clicksign-python-sdk[httpx]` e injete um cliente compartilhado:
 
 ```python
 from clicksign import ClicksignClient, HttpxHTTPClient

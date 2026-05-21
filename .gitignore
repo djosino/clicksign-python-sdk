@@ -13,7 +13,8 @@ htmlcov/
 *.log
 .env
 .claude/exec.log
-.claude/
+.claude/__pycache__/
+.claude/settings.local.json
 .idea/
 docs/CONSIDERACOES.md
 scripts/sandbox/.env

@@ -3,7 +3,7 @@
 O transporte padrão (`UrllibHTTPClient`) abre e fecha a conexão a cada request. Para **muitas chamadas por processo**, use `HttpxHTTPClient` com **uma instância compartilhada** por worker.
 
 ```bash
-pip install clicksign[httpx]
+pip install clicksign-python-sdk[httpx]
 ```
 
 ## Singleton por processo (recomendado)

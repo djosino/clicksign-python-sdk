@@ -9,6 +9,14 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Alterado
+
+- Nome do pacote no PyPI/TestPyPI: `clicksign-python-sdk` (`pip install clicksign-python-sdk`; import permanece `clicksign`)
+
+### Corrigido
+
+- `clicksign.__version__` após `pip install`: lê versão dos metadados do pacote (antes dependia de `REVISION`, ausente no wheel)
+
 ---
 
 ## [0.1.0] - 2026-05-21
