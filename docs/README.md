@@ -36,7 +36,7 @@
 
 ---
 
-## Cookbook (receitas Python)
+## Examples (receitas Python)
 
 | Receita | Tema |
 |---------|------|

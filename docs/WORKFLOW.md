@@ -2,7 +2,7 @@
 
 Este guia percorre o ciclo de vida completo de um envelope: criação, adição de documento e signatário, configuração dos requisitos de assinatura, ativação e notificação.
 
-**Documentação relacionada:** [Cookbook](examples/) (receitas) · [Troubleshooting](TROUBLESHOOTING.md) (erros comuns) · [Arquitetura](ARCHITECTURE.md) · [Observabilidade](OBSERVABILITY.md)
+**Documentação relacionada:** [Examples](examples/) (receitas) · [Troubleshooting](TROUBLESHOOTING.md) (erros comuns) · [Arquitetura](ARCHITECTURE.md) · [Observabilidade](OBSERVABILITY.md)
 
 ---
 

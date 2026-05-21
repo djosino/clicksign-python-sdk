@@ -60,4 +60,4 @@ Envelope.filter(status="draft").on_page(log_page).to_list()
 ## Referências
 
 - Contrato: [`SDK_CONTRACT.md`](SDK_CONTRACT.md) §7
-- Cookbook: [`examples/07-list-and-filter.md`](examples/07-list-and-filter.md)
+Example: [`examples/07-list-and-filter.md`](examples/07-list-and-filter.md)

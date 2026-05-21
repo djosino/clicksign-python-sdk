@@ -93,7 +93,7 @@ clicksign.log = "debug"  # or: clicksign.configure(..., log="info")
 # Uses stdlib logger "clicksign"; Authorization is never logged.
 ```
 
-See [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md) for hooks, logging levels, structlog/OpenTelemetry/metrics cookbooks, and **avoiding PII** in custom `on_error` handlers.
+See [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md) for hooks, logging levels, structlog/OpenTelemetry/metrics examples, and **avoiding PII** in custom `on_error` handlers.
 
 **Correlation:** pass `X-Correlation-Id` per call via `RequestOptions(headers=correlation_id("your-id"))` to tie SDK requests to your web request or job id. The API may echo correlation in support; use `error.request_id` from `X-Request-Id` on failures for Clicksign support tickets.
 

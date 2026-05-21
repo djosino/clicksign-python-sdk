@@ -1,4 +1,4 @@
-# Cookbook — Clicksign SDK
+# Examples — Clicksign SDK
 
 Receitas curtas por cenário. Exemplos Python salvo indicação; páginas legadas Ruby usam `require 'clicksign'`.
 

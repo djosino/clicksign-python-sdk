@@ -116,7 +116,7 @@ clicksign.set_log("debug")
 clicksign.on_request(lambda e: logger.info("clicksign.request", extra=e))
 ```
 
-Cookbook structlog: [`examples/09-observability-structlog.md`](examples/09-observability-structlog.md).
+Example — structlog: [`examples/09-observability-structlog.md`](examples/09-observability-structlog.md).
 
 ---
 
