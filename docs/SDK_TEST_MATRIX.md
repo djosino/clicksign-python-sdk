@@ -135,10 +135,10 @@ Cada item deve ter teste em `tests/clicksign/`. Marque `[x]` quando coberto.
 Cobertura por resource (CRUD, filter, erros 404/422 onde aplicável):
 
 - [x] Notarial: envelope, document, signer, requirement, signature_watcher, bulk_requirement, event
-- [x] Admin: user, template, template_field, membership, group, folder, webhook, event
+- [x] Admin: user, template, template_field, membership, group, folder, webhook
 - [x] Parcial: acceptance_term, auto_signature, access_control_list, envelope_bulk_creation (conforme métodos expostos)
 
-Adicionar testes ao criar novos métodos em [`SDK_CLIENT_GAPS.md`](SDK_CLIENT_GAPS.md) §3.
+Adicionar testes ao criar novos métodos (ver [`SPEC.md`](SPEC.md) e esta matriz).
 
 ---
 

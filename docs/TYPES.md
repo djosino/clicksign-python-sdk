@@ -9,7 +9,7 @@ Resources com **TypedDict** de params e **properties** explícitas nos atributos
 | Resource | Create / update / filter |
 |----------|-------------------------|
 | **Notarial** | `Envelope`, `Document`, `Signer`, `Requirement`, `SignatureWatcher`, `NotarialEvent` |
-| **Conta** | `Webhook`, `Folder`, `User`, `Template`, `TemplateField`, `Membership`, `Group`, `AccountEvent` |
+| **Conta** | `Webhook`, `Folder`, `User`, `Template`, `TemplateField`, `Membership`, `Group` |
 
 Import:
 
@@ -30,8 +30,7 @@ assert envelope.name == "Contract"
 
 A API usa o mesmo `type: events` em rotas diferentes. O spec distingue:
 
-- **`AccountEvent*`** — `clicksign.resources.event.Event` (`GET /events`)
-- **`NotarialEvent*`** — `clicksign.resources.notarial.event.Event` (ex.: `Envelope.list_events`)
+- **`NotarialEvent*`** — `clicksign.resources.notarial.event.Event` (`Envelope.list_events`, `Document.list_events`, `Event.create_for_document`)
 
 ### Membership: filtro `user.id`
 
@@ -78,6 +77,6 @@ pytest -q
 
 ## Próximos passos (fora do §4)
 
-- Resources admin restantes (`AccessControlList`, `EnvelopeBulkCreation`, …) conforme [`SDK_CLIENT_GAPS.md`](SDK_CLIENT_GAPS.md) §3
+- Resources admin restantes (`AccessControlList`, `EnvelopeBulkCreation`, …) conforme [`SPEC.md`](SPEC.md) e [`SDK_ROADMAP.md`](SDK_ROADMAP.md)
 - `Required[...]` em create params quando a API publicar obrigatoriedade
 - Integrar OpenAPI da Clicksign no gerador quando disponível

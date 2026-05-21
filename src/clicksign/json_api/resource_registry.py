@@ -23,7 +23,6 @@ def _load_registry() -> dict[str, type[Resource]]:
     from ..resources.access_control_list import AccessControlList
     from ..resources.auto_signature.term import Term
     from ..resources.envelope_bulk_creation import EnvelopeBulkCreation
-    from ..resources.event import Event
     from ..resources.folder import Folder
     from ..resources.group import Group
     from ..resources.membership import Membership
@@ -45,7 +44,6 @@ def _load_registry() -> dict[str, type[Resource]]:
         Signer,
         Requirement,
         SignatureWatcher,
-        Event,
         NotarialEvent,
         Webhook,
         User,

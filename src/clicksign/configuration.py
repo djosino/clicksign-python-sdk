@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from .http_transport import HTTPClient
+    from ._http.transport import HTTPClient
 
 _ENVIRONMENTS = {
     "production": "https://app.clicksign.com/api/v3",

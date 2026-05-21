@@ -1,10 +1,6 @@
 """Static typing helpers for Clicksign resources."""
 
 from .resources import (
-    AccountEventAttributes,
-    AccountEventCreateParams,
-    AccountEventFilterParams,
-    AccountEventUpdateParams,
     DocumentAttributes,
     DocumentCreateParams,
     DocumentFilterParams,
@@ -60,10 +56,6 @@ from .resources import (
 )
 
 __all__ = [
-    "AccountEventAttributes",
-    "AccountEventCreateParams",
-    "AccountEventFilterParams",
-    "AccountEventUpdateParams",
     "DocumentAttributes",
     "DocumentCreateParams",
     "DocumentFilterParams",

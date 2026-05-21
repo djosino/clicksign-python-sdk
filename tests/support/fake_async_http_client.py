@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from clicksign.http_transport import HTTPResponse, HTTPStatusError
+from clicksign._http.transport import HTTPResponse, HTTPStatusError
 
 
 class FakeAsyncHTTPClient:

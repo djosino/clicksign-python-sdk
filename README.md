@@ -10,12 +10,11 @@ Python client for the [Clicksign API v3](https://developers.clicksign.com/) (JSO
 
 ## Documentation
 
-**Index:** [`docs/README.md`](docs/README.md) — mapa por tema (contrato, gaps, examples, observabilidade, paginação).
+**Index:** [`docs/README.md`](docs/README.md) — mapa por tema (contrato, roadmap, examples, observabilidade, paginação).
 
 | Start here | Also |
 |------------|------|
 | [`SDK_CONTRACT.md`](docs/SDK_CONTRACT.md) | [`SPEC.md`](docs/SPEC.md), [`WORKFLOW.md`](docs/WORKFLOW.md) |
-| [`SDK_CLIENT_GAPS.md`](docs/SDK_CLIENT_GAPS.md) | [`SDK_ROADMAP.md`](docs/SDK_ROADMAP.md), [`SDK_TEST_MATRIX.md`](docs/SDK_TEST_MATRIX.md) |
 | [`OBSERVABILITY.md`](docs/OBSERVABILITY.md) | [`PAGINATION.md`](docs/PAGINATION.md), [`TYPES.md`](docs/TYPES.md) |
 | [`examples/`](docs/examples/) | [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 
@@ -29,13 +28,12 @@ Python client for the [Clicksign API v3](https://developers.clicksign.com/) (JSO
 | `client.notarial.requirements` | `Requirement` | `from clicksign import Requirement` |
 | `client.notarial.bulk_requirements` | `BulkRequirement` | `from clicksign import BulkRequirement` |
 | `client.notarial.signature_watchers` | `SignatureWatcher` | `from clicksign.resources.notarial.signature_watcher import SignatureWatcher` |
-| `client.notarial.events` | `Event` (notarial) | `from clicksign.resources.notarial.event import Event` |
+| — | `Event` (nested) | `Envelope.list_events(id)`, `Document.list_events(doc_id, envelope_id=…)`, `Event.create_for_document` |
 | `client.webhooks` | `Webhook` | `from clicksign.resources.webhook import Webhook` |
 | `client.users` | `User` | `from clicksign.resources.user import User` |
 | `client.templates` / `template_fields` | `Template`, `TemplateField` | `from clicksign.resources.template import Template` |
 | `client.memberships` / `groups` | `Membership`, `Group` | imports em `clicksign.resources.*` |
 | `client.folders` | `Folder` | `from clicksign.resources.folder import Folder` |
-| `client.events` | `Event` (conta) | `from clicksign.resources.event import Event` |
 | `client.access_control_lists` | `AccessControlList` | `from clicksign.resources.access_control_list import AccessControlList` |
 | `client.envelope_bulk_creations` | `EnvelopeBulkCreation` | import direto do módulo |
 | `client.acceptance_term.whatsapps` | `Whatsapp` | `from clicksign.resources.acceptance_term.whatsapp import Whatsapp` |

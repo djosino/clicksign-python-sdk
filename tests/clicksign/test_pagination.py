@@ -72,9 +72,7 @@ def test_query_proxy_last_response_each_page_during_iteration():
     request_ids: list[str | None] = []
     with mock_urlopen(*responses):
         for _ in proxy:
-            request_ids.append(
-                proxy.last_response.request_id if proxy.last_response else None
-            )
+            request_ids.append(proxy.last_response.request_id if proxy.last_response else None)
     assert request_ids == ["page-1", "page-2"]
     assert [m.request_id for m in proxy.page_responses] == ["page-1", "page-2"]
 

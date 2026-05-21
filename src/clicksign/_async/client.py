@@ -4,25 +4,25 @@ import json
 import urllib.parse
 from typing import TYPE_CHECKING, Any
 
-from .async_http_executor import execute_async_http_request
-from .http_transport import AsyncHTTPClient, default_async_http_client
-from .instrumentation import Instrumentation
-from .raw_response import RawResponse
-from .request_headers import default_request_headers
-from .request_instrumentation import RequestInstrumentation
-from .request_options import (
+from .._http.headers import default_request_headers
+from .._http.transport import AsyncHTTPClient, default_async_http_client
+from ..instrumentation import Instrumentation
+from ..raw_response import RawResponse
+from ..request_instrumentation import RequestInstrumentation
+from ..request_options import (
     RequestOptions,
     merge_headers,
     normalize_options,
     resolve_max_retries,
     resolve_timeouts,
 )
-from .response_metadata import ResponseMetadata
+from ..response_metadata import ResponseMetadata
+from .http_executor import execute_async_http_request
 
 if TYPE_CHECKING:
-    from .app_info import AppInfo
-    from .provider_telemetry import ProviderTelemetry
-    from .resource import Resource
+    from ..app_info import AppInfo
+    from ..provider_telemetry import ProviderTelemetry
+    from ..resource import Resource
 
 
 class AsyncClient(RequestInstrumentation):
@@ -70,10 +70,10 @@ class AsyncClient(RequestInstrumentation):
         if provider_telemetry is not None:
             self._provider_telemetry = provider_telemetry
         else:
-            from .provider_telemetry import ProviderTelemetry as ProviderTelemetryCls
+            from ..provider_telemetry import ProviderTelemetry as ProviderTelemetryCls
 
             if enable_telemetry is None:
-                from . import _config
+                from .. import _config
 
                 resolved_enable = _config.enable_telemetry
                 resolved_url = telemetry_url if telemetry_url is not None else _config.telemetry_url
@@ -168,7 +168,7 @@ class AsyncClient(RequestInstrumentation):
         response: RawResponse | dict[str, Any],
         resource_class: type[Resource],
     ) -> Resource | list[Resource]:
-        from .client import Client
+        from ..client import Client
 
         return Client.deserialize(response, resource_class)
 

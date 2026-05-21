@@ -102,10 +102,10 @@ Baseado nas rotas da Clicksign API v3, namespace `:v3`.
 
 | Namespace Ruby | Resources | Motivo |
 |----------------|-----------|--------|
-| `Clicksign::Resources::Notarial` | Envelope, Document, Signer, Requirement, BulkRequirement, SignatureWatcher | Recursos do fluxo de assinatura (envelopes e ciclo de vida) |
+| `Clicksign::Resources::Notarial` | Envelope, Document, Signer, Requirement, BulkRequirement, SignatureWatcher, Event | Recursos do fluxo de assinatura (envelopes e ciclo de vida); Event só em rotas nested |
 | `Clicksign::Resources::AutoSignature` | Term | Namespace de rotas (`namespace :auto_signature`) |
 | `Clicksign::Resources::AcceptanceTerm` | Whatsapp | Namespace de rotas (`namespace :acceptance_term`) |
-| `Clicksign::Resources` (raiz) | Webhook, User, Membership, Group, Template, TemplateField, Folder, EnvelopeBulkCreation, AccessControlList, Event | Recursos gerais sem namespace específico |
+| `Clicksign::Resources` (raiz) | Webhook, User, Membership, Group, Template, TemplateField, Folder, EnvelopeBulkCreation, AccessControlList | Recursos gerais sem namespace específico |
 
 ---
 

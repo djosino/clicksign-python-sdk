@@ -192,9 +192,7 @@ class Resource:
         return self._get_client()
 
     @classmethod
-    def _parse_response(
-        cls, response: dict[str, Any]
-    ) -> tuple[builtins.list[Resource], Any]:
+    def _parse_response(cls, response: dict[str, Any]) -> tuple[builtins.list[Resource], Any]:
         from .json_api.included import IncludedIndex
         from .json_api.parser import ParsedResponse, parse
 
@@ -429,20 +427,14 @@ class QueryProxy(Generic[TResource]):
         self._on_page = callback
         return self
 
-    def to_list(
-        self, *, options: RequestOptions | dict[str, Any] | None = None
-    ) -> list[TResource]:
+    def to_list(self, *, options: RequestOptions | dict[str, Any] | None = None) -> list[TResource]:
         return list(self._auto_paginate(options=options))
 
-    def first(
-        self, *, options: RequestOptions | dict[str, Any] | None = None
-    ) -> TResource | None:
+    def first(self, *, options: RequestOptions | dict[str, Any] | None = None) -> TResource | None:
         items = self._fetch_page(options=options)
         return items[0] if items else None
 
-    def last(
-        self, *, options: RequestOptions | dict[str, Any] | None = None
-    ) -> TResource | None:
+    def last(self, *, options: RequestOptions | dict[str, Any] | None = None) -> TResource | None:
         items = list(self._auto_paginate(options=options))
         return items[-1] if items else None
 

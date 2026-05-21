@@ -3,8 +3,8 @@ from unittest.mock import patch
 
 import pytest
 
+from clicksign._http.transport import UrllibHTTPClient
 from clicksign.errors import AuthenticationError, ServerError, TimeoutError, ValidationError
-from clicksign.http_transport import UrllibHTTPClient
 from clicksign.instrumentation import Instrumentation
 from clicksign.json_api.bulk_operations_client import (
     BulkOperationsClient,

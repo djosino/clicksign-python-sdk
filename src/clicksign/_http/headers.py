@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .app_info import AppInfo
+    from ..app_info import AppInfo
 
 CORRELATION_ID_HEADER = "X-Correlation-Id"
 
@@ -24,7 +24,7 @@ def correlation_id(value: str) -> dict[str, str]:
 
 
 def default_request_headers(api_key: str, app_info: AppInfo | None = None) -> dict[str, str]:
-    from .user_agent import build_user_agent
+    from ..user_agent import build_user_agent
 
     return {
         "Authorization": api_key,

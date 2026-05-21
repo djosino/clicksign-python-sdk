@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from clicksign.http_transport import HTTPConnectionError, HTTPResponse, HTTPStatusError
+from clicksign._http.transport import HTTPConnectionError, HTTPResponse, HTTPStatusError
 
 
 class FakeHTTPClient:

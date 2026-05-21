@@ -1,6 +1,5 @@
 from .access_control_list import AccessControlList
 from .envelope_bulk_creation import EnvelopeBulkCreation
-from .event import Event
 from .folder import Folder
 from .group import Group
 from .membership import Membership
@@ -19,5 +18,4 @@ __all__ = [
     "Folder",
     "EnvelopeBulkCreation",
     "AccessControlList",
-    "Event",
 ]

@@ -4,11 +4,11 @@ import json
 import urllib.parse
 from typing import TYPE_CHECKING, Any
 
-from .http_executor import execute_http_request
-from .http_transport import HTTPClient, default_http_client
+from ._http.executor import execute_http_request
+from ._http.headers import default_request_headers
+from ._http.transport import HTTPClient, default_http_client
 from .instrumentation import Instrumentation
 from .raw_response import RawResponse
-from .request_headers import default_request_headers
 from .request_instrumentation import RequestInstrumentation
 from .request_options import (
     RequestOptions,

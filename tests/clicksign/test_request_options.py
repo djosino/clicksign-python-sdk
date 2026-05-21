@@ -3,9 +3,9 @@ from typing import Any
 import pytest
 
 from clicksign import ClicksignClient, RequestOptions
+from clicksign._http.headers import CORRELATION_ID_HEADER, correlation_id
 from clicksign.client import Client
 from clicksign.instrumentation import Instrumentation
-from clicksign.request_headers import CORRELATION_ID_HEADER, correlation_id
 from clicksign.request_options import (
     merge_headers,
     normalize_options,

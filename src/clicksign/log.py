@@ -46,8 +46,7 @@ def set_log(level: str | bool | None) -> None:
         normalized = str(level).strip().lower()
         if normalized not in _LEVELS:
             raise ValueError(
-                f"Invalid log level: {level!r}. "
-                "Use 'debug', 'info', 'warn', 'warning', or 'error'."
+                f"Invalid log level: {level!r}. Use 'debug', 'info', 'warn', 'warning', or 'error'."
             )
         _log_level = normalized
     _apply_logger_level()

@@ -1,4 +1,3 @@
-
 from clicksign.json_api.included import IncludedIndex
 from clicksign.resources.folder import Folder
 from clicksign.resources.notarial.envelope import Envelope

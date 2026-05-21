@@ -6,13 +6,13 @@ import time
 from collections.abc import Callable
 from typing import Any
 
-from . import errors, retry_backoff
-from .error_handler import handle as handle_error
-from .http_transport import AsyncHTTPClient, HTTPConnectionError, HTTPStatusError
-from .instrumentation import Instrumentation
-from .log import log_error, log_http_exchange, log_retry
-from .request_instrumentation import RequestInstrumentation
-from .response_metadata import HttpResult, build_response_metadata
+from .. import errors, retry_backoff
+from .._http.transport import AsyncHTTPClient, HTTPConnectionError, HTTPStatusError
+from ..error_handler import handle as handle_error
+from ..instrumentation import Instrumentation
+from ..log import log_error, log_http_exchange, log_retry
+from ..request_instrumentation import RequestInstrumentation
+from ..response_metadata import HttpResult, build_response_metadata
 
 
 async def execute_async_http_request(

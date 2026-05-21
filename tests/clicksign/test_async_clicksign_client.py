@@ -1,6 +1,6 @@
 import pytest
 
-from clicksign.async_clicksign_client import AsyncClicksignClient
+from clicksign._async.clicksign_client import AsyncClicksignClient
 from clicksign.resources.notarial.envelope import Envelope
 from tests.support.fake_async_http_client import FakeAsyncHTTPClient
 from tests.support.fake_http_client import http_response

@@ -9,7 +9,7 @@ from io import BytesIO
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-from clicksign.http_transport import (
+from clicksign._http.transport import (
     HTTPConnectionError,
     HTTPResponse,
     HTTPStatusError,

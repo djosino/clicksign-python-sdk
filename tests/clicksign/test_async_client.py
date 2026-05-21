@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from clicksign.async_client import AsyncClient
+from clicksign._async.client import AsyncClient
 from clicksign.instrumentation import Instrumentation
 from tests.support.fake_async_http_client import FakeAsyncHTTPClient
 from tests.support.fake_http_client import http_response

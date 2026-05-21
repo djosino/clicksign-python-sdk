@@ -3,13 +3,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from clicksign.client import Client
-from clicksign.http_transport import (
+from clicksign._http.transport import (
     HTTPStatusError,
     HttpxHTTPClient,
     UrllibHTTPClient,
     default_http_client,
 )
+from clicksign.client import Client
 from clicksign.instrumentation import Instrumentation
 from tests.support.fake_http_client import (
     FakeHTTPClient,
@@ -150,10 +150,11 @@ def test_retries_on_429_honors_retry_after_header():
         http_response(200, {"data": []}),
     )
     sleeps: list[float] = []
+
     def record_sleep(seconds: float) -> None:
         sleeps.append(seconds)
 
-    with patch("clicksign.http_executor.time.sleep", side_effect=record_sleep):
+    with patch("clicksign._http.executor.time.sleep", side_effect=record_sleep):
         with patch("clicksign.retry_backoff.delay", return_value=0):
             make_client(max_retries=1, http_client=fake).get("/envelopes")
     assert len(sleeps) == 1

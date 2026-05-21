@@ -15,12 +15,11 @@
 
 ---
 
-## SDK (infraestrutura e gaps)
+## SDK (infraestrutura)
 
 | Documento | Para quê |
 |-----------|----------|
 | [`SDK_ROADMAP.md`](SDK_ROADMAP.md) | Checklist histórico de features do SDK + decisões de design |
-| [`SDK_CLIENT_GAPS.md`](SDK_CLIENT_GAPS.md) | Gaps **somente no cliente** (sem mudança na API) — status por § |
 | [`SDK_TEST_MATRIX.md`](SDK_TEST_MATRIX.md) | Cobertura de testes comportamentais (`tests/clicksign/`) |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Diagramas: request típico, bulk, webhooks |
 
@@ -58,7 +57,4 @@
 ## Manutenção da doc
 
 1. Comportamento novo → atualizar `SDK_CONTRACT.md` + teste em `tests/clicksign/` + linha em `SDK_TEST_MATRIX.md`.
-2. Gap só no cliente → `SDK_CLIENT_GAPS.md`; depende da API → `SDK_ROADMAP.md` §15–18.
-3. Receita copiável → novo arquivo em `examples/` e linha neste README + `examples/README.md`.
-
-**Última revisão geral:** maio/2026 (§9 SDK_CLIENT_GAPS).
+2. Receita copiável → novo arquivo em `examples/` e linha neste README + `examples/README.md`.

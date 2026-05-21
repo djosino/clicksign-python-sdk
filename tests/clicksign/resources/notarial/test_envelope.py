@@ -88,8 +88,7 @@ def test_filter_with_status():
         Envelope.filter(status="draft").to_list()
 
     assert (
-        "filter%5Bstatus%5D=draft" in captured["url"]
-        or "filter[status]=draft" in captured["url"]
+        "filter%5Bstatus%5D=draft" in captured["url"] or "filter[status]=draft" in captured["url"]
     )
 
 

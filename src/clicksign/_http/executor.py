@@ -5,13 +5,13 @@ import time
 from collections.abc import Callable
 from typing import Any
 
-from . import errors, retry_backoff
-from .error_handler import handle as handle_error
-from .http_transport import HTTPClient, HTTPConnectionError, HTTPStatusError
-from .instrumentation import Instrumentation
-from .log import log_error, log_http_exchange, log_retry
-from .request_instrumentation import RequestInstrumentation
-from .response_metadata import HttpResult, build_response_metadata
+from .. import errors, retry_backoff
+from ..error_handler import handle as handle_error
+from ..instrumentation import Instrumentation
+from ..log import log_error, log_http_exchange, log_retry
+from ..request_instrumentation import RequestInstrumentation
+from ..response_metadata import HttpResult, build_response_metadata
+from .transport import HTTPClient, HTTPConnectionError, HTTPStatusError
 
 
 def execute_http_request(

@@ -109,9 +109,7 @@ def test_telemetry_on_http_error_status():
         write_timeout=7.0,
         max_retries=0,
         instrumentation=Instrumentation(),
-        http_client=FakeHTTPClient(
-            http_response(404, {"errors": [{"detail": "missing"}]})
-        ),
+        http_client=FakeHTTPClient(http_response(404, {"errors": [{"detail": "missing"}]})),
         provider_telemetry=telemetry,
     )
     try:

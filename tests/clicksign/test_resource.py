@@ -1,4 +1,3 @@
-
 import pytest
 
 from clicksign.resource import QueryProxy, Resource, _infer_resource_type

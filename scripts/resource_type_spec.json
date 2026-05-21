@@ -260,25 +260,16 @@
         "name": "str"
       }
     },
-    "AccountEvent": {
-      "attributes": {
-        "name": "str",
-        "data": "dict",
-        "created": "str"
-      },
-      "create": {},
-      "update": {},
-      "filter": {
-        "name": "str"
-      }
-    },
     "NotarialEvent": {
       "attributes": {
         "name": "str",
         "data": "dict",
         "created": "str"
       },
-      "create": {},
+      "create": {
+        "name": "str",
+        "data": "dict"
+      },
       "update": {},
       "filter": {
         "name": "str"

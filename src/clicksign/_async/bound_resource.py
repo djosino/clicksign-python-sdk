@@ -4,15 +4,15 @@ import asyncio
 from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING, Any
 
-from .async_bridge import AsyncClientSyncShim
-from .async_resource import AsyncQueryProxy, attach_from_async_client
-from .client_scope import client_scope
-from .json_api.serializer import serialize_create
-from .resource import Resource
+from ..client_scope import client_scope
+from ..json_api.serializer import serialize_create
+from ..resource import Resource
+from .bridge import AsyncClientSyncShim
+from .resource import AsyncQueryProxy, attach_from_async_client
 
 if TYPE_CHECKING:
-    from .async_clicksign_client import AsyncClicksignClient
-    from .request_options import RequestOptions
+    from ..request_options import RequestOptions
+    from .clicksign_client import AsyncClicksignClient
 
 
 class AsyncBoundQueryProxy:

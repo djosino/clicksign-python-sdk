@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from clicksign.http_transport import (
+from clicksign._http.transport import (
     HTTPConnectionError,
     UrllibHTTPClient,
 )

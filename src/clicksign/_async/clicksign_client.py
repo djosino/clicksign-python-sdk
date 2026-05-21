@@ -2,26 +2,25 @@ from __future__ import annotations
 
 from typing import Any
 
-from .async_bound_resource import AsyncBoundResource
-from .async_client import AsyncClient
-from .configuration import _ENVIRONMENTS, DEFAULT_MAX_RETRIES
-from .http_transport import AsyncHTTPClient
-from .instrumentation import Instrumentation
-from .raw_response import RawResponse
-from .request_options import RequestOptions
-from .resource import Resource
-from .response_metadata import ResponseMetadata
+from .._http.transport import AsyncHTTPClient
+from ..configuration import _ENVIRONMENTS, DEFAULT_MAX_RETRIES
+from ..instrumentation import Instrumentation
+from ..raw_response import RawResponse
+from ..request_options import RequestOptions
+from ..resource import Resource
+from ..response_metadata import ResponseMetadata
+from .bound_resource import AsyncBoundResource
+from .client import AsyncClient
 
 
 class AsyncNotarialNamespace:
     def __init__(self, client: AsyncClicksignClient) -> None:
-        from .resources.notarial.bulk_requirement import BulkRequirement
-        from .resources.notarial.document import Document
-        from .resources.notarial.envelope import Envelope
-        from .resources.notarial.event import Event
-        from .resources.notarial.requirement import Requirement
-        from .resources.notarial.signature_watcher import SignatureWatcher
-        from .resources.notarial.signer import Signer
+        from ..resources.notarial.bulk_requirement import BulkRequirement
+        from ..resources.notarial.document import Document
+        from ..resources.notarial.envelope import Envelope
+        from ..resources.notarial.requirement import Requirement
+        from ..resources.notarial.signature_watcher import SignatureWatcher
+        from ..resources.notarial.signer import Signer
 
         self.envelopes = AsyncBoundResource(client, Envelope)
         self.documents = AsyncBoundResource(client, Document)
@@ -29,19 +28,18 @@ class AsyncNotarialNamespace:
         self.requirements = AsyncBoundResource(client, Requirement)
         self.bulk_requirements = AsyncBoundResource(client, BulkRequirement)
         self.signature_watchers = AsyncBoundResource(client, SignatureWatcher)
-        self.events = AsyncBoundResource(client, Event)
 
 
 class AsyncAutoSignatureNamespace:
     def __init__(self, client: AsyncClicksignClient) -> None:
-        from .resources.auto_signature.term import Term
+        from ..resources.auto_signature.term import Term
 
         self.terms = AsyncBoundResource(client, Term)
 
 
 class AsyncAcceptanceTermNamespace:
     def __init__(self, client: AsyncClicksignClient) -> None:
-        from .resources.acceptance_term.whatsapp import Whatsapp
+        from ..resources.acceptance_term.whatsapp import Whatsapp
 
         self.whatsapps = AsyncBoundResource(client, Whatsapp)
 
@@ -91,10 +89,10 @@ class AsyncClicksignClient:
 
         resolved_base_url = base_url or _ENVIRONMENTS["production"]
 
-        from .provider_telemetry import ProviderTelemetry
+        from ..provider_telemetry import ProviderTelemetry
 
         if enable_telemetry is None:
-            from . import _config
+            from .. import _config
 
             resolved_enable = _config.enable_telemetry
             resolved_telemetry_url = (
@@ -129,16 +127,15 @@ class AsyncClicksignClient:
         self.auto_signature = AsyncAutoSignatureNamespace(self)
         self.acceptance_term = AsyncAcceptanceTermNamespace(self)
 
-        from .resources.access_control_list import AccessControlList
-        from .resources.envelope_bulk_creation import EnvelopeBulkCreation
-        from .resources.event import Event
-        from .resources.folder import Folder
-        from .resources.group import Group
-        from .resources.membership import Membership
-        from .resources.template import Template
-        from .resources.template_field import TemplateField
-        from .resources.user import User
-        from .resources.webhook import Webhook
+        from ..resources.access_control_list import AccessControlList
+        from ..resources.envelope_bulk_creation import EnvelopeBulkCreation
+        from ..resources.folder import Folder
+        from ..resources.group import Group
+        from ..resources.membership import Membership
+        from ..resources.template import Template
+        from ..resources.template_field import TemplateField
+        from ..resources.user import User
+        from ..resources.webhook import Webhook
 
         self.webhooks = AsyncBoundResource(self, Webhook)
         self.users = AsyncBoundResource(self, User)
@@ -149,7 +146,6 @@ class AsyncClicksignClient:
         self.folders = AsyncBoundResource(self, Folder)
         self.envelope_bulk_creations = AsyncBoundResource(self, EnvelopeBulkCreation)
         self.access_control_lists = AsyncBoundResource(self, AccessControlList)
-        self.events = AsyncBoundResource(self, Event)
 
     @property
     def http(self) -> AsyncClient:

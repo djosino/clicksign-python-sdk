@@ -4,7 +4,12 @@ from typing import TYPE_CHECKING, Any
 
 from ...request_options import RequestOptions
 from ...resource import QueryProxy, Resource
-from ...types import EnvelopeCreateParams, EnvelopeFilterParams, EnvelopeUpdateParams
+from ...types import (
+    EnvelopeCreateParams,
+    EnvelopeFilterParams,
+    EnvelopeUpdateParams,
+    NotarialEventFilterParams,
+)
 from ...types._attrs import bool_attr, int_attr, str_attr
 
 if TYPE_CHECKING:
@@ -89,10 +94,21 @@ class Envelope(Resource):
         return self
 
     @classmethod
-    def list_events(cls, envelope_id: str) -> list[Event]:
+    def list_events(
+        cls,
+        envelope_id: str,
+        **kwargs: Unpack[NotarialEventFilterParams],
+    ) -> list[Event]:
+        from ...json_api.query_builder import QueryBuilder
         from .event import Event
 
-        return cls.nested_list(envelope_id, "events", as_class=Event)  # type: ignore[return-value]
+        params = QueryBuilder().filter(**kwargs).to_params() if kwargs else None
+        return cls.nested_list(
+            envelope_id,
+            "events",
+            as_class=Event,
+            params=params,
+        )  # type: ignore[return-value]
 
     @classmethod
     def list_documents(cls, envelope_id: str) -> list[Document]:

@@ -42,8 +42,6 @@ Roadmap de infraestrutura e DX do SDK Clicksign Python (camada HTTP, resources, 
 - [x] `correlation_id()` helper
 - [x] Runtime default stdlib-only; extras `httpx` / `async`
 
-Detalhes por § abaixo permanecem como histórico; gaps abertos do cliente: [`SDK_CLIENT_GAPS.md`](SDK_CLIENT_GAPS.md). Índice de docs: [`README.md`](README.md).
-
 ---
 
 ## 1. Transporte HTTP plugável
@@ -404,13 +402,10 @@ Ver [`docs/TYPES.md`](TYPES.md).
 
 ### Concluído no v1
 
-Itens §2–§14, §16–§17 (exceto N/A §15, §18). Ver lista **Já implementado** acima e [`SDK_CLIENT_GAPS.md`](SDK_CLIENT_GAPS.md) para polish recente.
-
 ### Aberto / contínuo
 
 | Área | Onde |
 |------|------|
-| Cobertura de resources admin | `SDK_CLIENT_GAPS.md` §3 |
 | httpx como default (breaking) | §1 futuro v2 |
 | Idempotência / retry 409 | §15, §18 — N/A API |
 

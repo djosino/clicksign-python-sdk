@@ -16,6 +16,7 @@ class EnvelopeAttributes(TypedDict, total=False):
     remind_interval: int
     block_after_refusal: bool
 
+
 class EnvelopeCreateParams(TypedDict, total=False):
     name: str
     locale: str
@@ -23,6 +24,7 @@ class EnvelopeCreateParams(TypedDict, total=False):
     remind_interval: int
     block_after_refusal: bool
     deadline_at: str
+
 
 class EnvelopeUpdateParams(TypedDict, total=False):
     name: str
@@ -33,9 +35,11 @@ class EnvelopeUpdateParams(TypedDict, total=False):
     block_after_refusal: bool
     deadline_at: str
 
+
 class EnvelopeFilterParams(TypedDict, total=False):
     status: str
     name: str
+
 
 class DocumentAttributes(TypedDict, total=False):
     filename: str
@@ -45,19 +49,23 @@ class DocumentAttributes(TypedDict, total=False):
     created_at: str
     updated_at: str
 
+
 class DocumentCreateParams(TypedDict, total=False):
     filename: str
     content_base64: str
     template_key: str
     metadata: dict[str, Any]
 
+
 class DocumentUpdateParams(TypedDict, total=False):
     filename: str
     status: str
 
+
 class DocumentFilterParams(TypedDict, total=False):
     status: str
     filename: str
+
 
 class SignerAttributes(TypedDict, total=False):
     name: str
@@ -69,6 +77,7 @@ class SignerAttributes(TypedDict, total=False):
     created_at: str
     updated_at: str
 
+
 class SignerCreateParams(TypedDict, total=False):
     name: str
     email: str
@@ -77,12 +86,15 @@ class SignerCreateParams(TypedDict, total=False):
     birthday: str
     has_documentation: bool
 
+
 class SignerUpdateParams(TypedDict):
     pass
+
 
 class SignerFilterParams(TypedDict, total=False):
     name: str
     email: str
+
 
 class RequirementAttributes(TypedDict, total=False):
     action: str
@@ -91,19 +103,23 @@ class RequirementAttributes(TypedDict, total=False):
     created_at: str
     updated_at: str
 
+
 class RequirementCreateParams(TypedDict, total=False):
     action: str
     role: str
     rubricate: bool
+
 
 class RequirementUpdateParams(TypedDict, total=False):
     action: str
     role: str
     rubricate: bool
 
+
 class RequirementFilterParams(TypedDict, total=False):
     action: str
     role: str
+
 
 class SignatureWatcherAttributes(TypedDict, total=False):
     email: str
@@ -111,16 +127,20 @@ class SignatureWatcherAttributes(TypedDict, total=False):
     created_at: str
     updated_at: str
 
+
 class SignatureWatcherCreateParams(TypedDict, total=False):
     email: str
     kind: str
 
+
 class SignatureWatcherUpdateParams(TypedDict):
     pass
+
 
 class SignatureWatcherFilterParams(TypedDict, total=False):
     kind: str
     email: str
+
 
 class WebhookAttributes(TypedDict, total=False):
     endpoint: str
@@ -130,19 +150,23 @@ class WebhookAttributes(TypedDict, total=False):
     created_at: str
     updated_at: str
 
+
 class WebhookCreateParams(TypedDict, total=False):
     endpoint: str
     events: list[str]
     status: str
+
 
 class WebhookUpdateParams(TypedDict, total=False):
     endpoint: str
     events: list[str]
     status: str
 
+
 class WebhookFilterParams(TypedDict, total=False):
     status: str
     endpoint: str
+
 
 class FolderAttributes(TypedDict, total=False):
     name: str
@@ -151,15 +175,19 @@ class FolderAttributes(TypedDict, total=False):
     created_at: str
     updated_at: str
 
+
 class FolderCreateParams(TypedDict, total=False):
     name: str
+
 
 class FolderUpdateParams(TypedDict):
     pass
 
+
 class FolderFilterParams(TypedDict, total=False):
     in_root: bool
     name: str
+
 
 class UserAttributes(TypedDict, total=False):
     name: str
@@ -168,16 +196,20 @@ class UserAttributes(TypedDict, total=False):
     created: str
     modified: str
 
+
 class UserCreateParams(TypedDict, total=False):
     name: str
     email: str
     phone_number: str
 
+
 class UserUpdateParams(TypedDict):
     pass
 
+
 class UserFilterParams(TypedDict, total=False):
     email: str
+
 
 class TemplateAttributes(TypedDict, total=False):
     name: str
@@ -186,18 +218,22 @@ class TemplateAttributes(TypedDict, total=False):
     created: str
     modified: str
 
+
 class TemplateCreateParams(TypedDict, total=False):
     name: str
     color: str
     content_base64: str
+
 
 class TemplateUpdateParams(TypedDict, total=False):
     name: str
     color: str
     content_base64: str
 
+
 class TemplateFilterParams(TypedDict, total=False):
     name: str
+
 
 class TemplateFieldAttributes(TypedDict, total=False):
     name: str
@@ -205,15 +241,19 @@ class TemplateFieldAttributes(TypedDict, total=False):
     created: str
     modified: str
 
+
 class TemplateFieldCreateParams(TypedDict):
     pass
+
 
 class TemplateFieldUpdateParams(TypedDict):
     pass
 
+
 class TemplateFieldFilterParams(TypedDict, total=False):
     name: str
     kind: str
+
 
 class MembershipAttributes(TypedDict, total=False):
     role: str
@@ -223,11 +263,13 @@ class MembershipAttributes(TypedDict, total=False):
     created: str
     modified: str
 
+
 class MembershipCreateParams(TypedDict, total=False):
     role: str
     consumption_accessible: bool
     tracking_accessible: bool
     folder_management_accessible: bool
+
 
 class MembershipUpdateParams(TypedDict, total=False):
     role: str
@@ -235,47 +277,43 @@ class MembershipUpdateParams(TypedDict, total=False):
     tracking_accessible: bool
     folder_management_accessible: bool
 
+
 class MembershipFilterParams(TypedDict, total=False):
     role: str
+
 
 class GroupAttributes(TypedDict, total=False):
     name: str
     created: str
     modified: str
 
+
 class GroupCreateParams(TypedDict, total=False):
     name: str
+
 
 class GroupUpdateParams(TypedDict, total=False):
     name: str
 
+
 class GroupFilterParams(TypedDict, total=False):
     name: str
 
-class AccountEventAttributes(TypedDict, total=False):
-    name: str
-    data: dict[str, Any]
-    created: str
-
-class AccountEventCreateParams(TypedDict):
-    pass
-
-class AccountEventUpdateParams(TypedDict):
-    pass
-
-class AccountEventFilterParams(TypedDict, total=False):
-    name: str
 
 class NotarialEventAttributes(TypedDict, total=False):
     name: str
     data: dict[str, Any]
     created: str
 
-class NotarialEventCreateParams(TypedDict):
-    pass
+
+class NotarialEventCreateParams(TypedDict, total=False):
+    name: str
+    data: dict[str, Any]
+
 
 class NotarialEventUpdateParams(TypedDict):
     pass
+
 
 class NotarialEventFilterParams(TypedDict, total=False):
     name: str

@@ -3,13 +3,13 @@ from __future__ import annotations
 from collections.abc import AsyncIterator, Callable
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
-from .json_api.query_builder import QueryBuilder
-from .request_options import RequestOptions, normalize_options
-from .resource import Resource
+from ..json_api.query_builder import QueryBuilder
+from ..request_options import RequestOptions, normalize_options
+from ..resource import Resource
 
 if TYPE_CHECKING:
-    from .async_client import AsyncClient
-    from .response_metadata import ResponseMetadata
+    from ..response_metadata import ResponseMetadata
+    from .client import AsyncClient
 
 TResource = TypeVar("TResource", bound=Resource)
 
@@ -121,7 +121,7 @@ class AsyncQueryProxy(Generic[TResource]):
         *,
         options: RequestOptions | dict[str, Any] | None = None,
     ) -> AsyncIterator[TResource]:
-        from .pagination import has_next_page, merge_page_params, resolve_page_size
+        from ..pagination import has_next_page, merge_page_params, resolve_page_size
 
         normalize_options(options)
         base_params = self._builder.to_params()

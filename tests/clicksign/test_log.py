@@ -173,7 +173,7 @@ def test_warn_logs_retry_without_final_error(monkeypatch):
         instrumentation=Instrumentation(),
         http_client=fake,
     )
-    monkeypatch.setattr("clicksign.http_executor.time.sleep", lambda _seconds: None)
+    monkeypatch.setattr("clicksign._http.executor.time.sleep", lambda _seconds: None)
 
     client.get("/envelopes")
 

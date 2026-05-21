@@ -4,11 +4,11 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from typing import Any
 
+from ._http.transport import HTTPClient
 from .bound_resource import BoundResource
 from .client import Client
 from .client_scope import client_scope
 from .configuration import _ENVIRONMENTS, DEFAULT_MAX_RETRIES
-from .http_transport import HTTPClient
 from .instrumentation import Instrumentation
 from .json_api.bulk_operations_client import BulkOperationsClient
 from .raw_response import RawResponse
@@ -22,7 +22,6 @@ class NotarialNamespace:
         from .resources.notarial.bulk_requirement import BulkRequirement
         from .resources.notarial.document import Document
         from .resources.notarial.envelope import Envelope
-        from .resources.notarial.event import Event
         from .resources.notarial.requirement import Requirement
         from .resources.notarial.signature_watcher import SignatureWatcher
         from .resources.notarial.signer import Signer
@@ -33,7 +32,6 @@ class NotarialNamespace:
         self.requirements = BoundResource(client, Requirement)
         self.bulk_requirements = BoundResource(client, BulkRequirement)
         self.signature_watchers = BoundResource(client, SignatureWatcher)
-        self.events = BoundResource(client, Event)
 
 
 class AutoSignatureNamespace:
@@ -150,7 +148,6 @@ class ClicksignClient:
 
         from .resources.access_control_list import AccessControlList
         from .resources.envelope_bulk_creation import EnvelopeBulkCreation
-        from .resources.event import Event
         from .resources.folder import Folder
         from .resources.group import Group
         from .resources.membership import Membership
@@ -168,7 +165,6 @@ class ClicksignClient:
         self.folders = BoundResource(self, Folder)
         self.envelope_bulk_creations = BoundResource(self, EnvelopeBulkCreation)
         self.access_control_lists = BoundResource(self, AccessControlList)
-        self.events = BoundResource(self, Event)
 
     @property
     def http(self) -> Client:
