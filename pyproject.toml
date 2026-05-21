@@ -56,5 +56,4 @@ files = [
     "src/clicksign/resources/template_field.py",
     "src/clicksign/resources/membership.py",
     "src/clicksign/resources/group.py",
-    "src/clicksign/resources/event.py",
 ]

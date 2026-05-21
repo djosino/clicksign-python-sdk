@@ -2,11 +2,10 @@
 
 **Versão:** 1.0
 **Fonte:** Clicksign API v3 (JSON:API 1.1)
-**Implementação de referência:** `../clicksign-ruby-sdk`
+**Implementação:** este repositório (`clicksign` no PyPI)
 
-Este documento define o **contrato comportamental completo** para qualquer port do Clicksign SDK.
-Implemente cada seção exatamente como especificado. Quando os idiomas do Python diferirem do Ruby, prefira os idiomas do Python,
-mas preserve o comportamento.
+Este documento define o **contrato comportamental** do SDK Python. Implementações em outras linguagens devem preservar o mesmo comportamento observável (HTTP, retry, erros, bulk, paginação).
+Mapa de classes e rotas: [`SPEC.md`](SPEC.md).
 
 ---
 

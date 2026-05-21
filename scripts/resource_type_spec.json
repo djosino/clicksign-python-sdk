@@ -95,6 +95,7 @@
       "create": {
         "action": "str",
         "role": "str",
+        "auth": "str",
         "rubricate": "bool"
       },
       "update": {

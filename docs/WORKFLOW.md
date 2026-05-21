@@ -1,192 +1,210 @@
 # Fluxo completo de assinatura
 
-Este guia percorre o ciclo de vida completo de um envelope: criação, adição de documento e signatário, configuração dos requisitos de assinatura, ativação e notificação.
+Guia do ciclo de vida de um envelope na API 3.0 (Envelope): criação, documento, signatário, requisitos, ativação, notificação e monitoramento.
 
-**Documentação relacionada:** [Examples](examples/) (receitas) · [Troubleshooting](TROUBLESHOOTING.md) (erros comuns) · [Arquitetura](ARCHITECTURE.md) · [Observabilidade](OBSERVABILITY.md)
+**Documentação relacionada:** [Examples](examples/) · [Troubleshooting](TROUBLESHOOTING.md) · [Arquitetura](ARCHITECTURE.md) · [Observabilidade](OBSERVABILITY.md) · [README do pacote](../README.md)
 
 ---
 
 ## Configuração inicial
 
-```ruby
-require 'clicksign'
+Recomendado para código novo: `ClicksignClient` (dependências explícitas). Alternativa legada: `configure()` + classes de resource.
 
-Clicksign.configure do |c|
-  c.api_key     = ENV.fetch('CLICKSIGN_API_KEY')
-  c.environment = :sandbox   # ou :production
-  # c.base_url = ENV['CLICKSIGN_API_BASE_URL']  # opcional: sobrescreve environment
-end
+```python
+import os
 
-Envelope          = Clicksign::Resources::Notarial::Envelope
-Document          = Clicksign::Resources::Notarial::Document
-Signer            = Clicksign::Resources::Notarial::Signer
-Requirement       = Clicksign::Resources::Notarial::Requirement
+from clicksign import ClicksignClient
+
+client = ClicksignClient(
+    api_key=os.environ["CLICKSIGN_API_KEY"],
+    environment="sandbox",  # ou "production"
+    # base_url="https://..."  # opcional: sobrescreve environment
+)
+```
+
+Equivalente global:
+
+```python
+import clicksign
+from clicksign.resources.notarial.envelope import Envelope
+from clicksign.resources.notarial.document import Document
+from clicksign.resources.notarial.signer import Signer
+from clicksign.resources.notarial.requirement import Requirement
+
+clicksign.configure(api_key=os.environ["CLICKSIGN_API_KEY"], environment="sandbox")
 ```
 
 ---
 
 ## 1. Criar o envelope
 
-O envelope é o contêiner do processo de assinatura. Começa com status `draft`.
+O envelope é o contêiner do processo. Começa em `draft`.
 
-```ruby
-envelope = Envelope.create(
-  name:            'Contrato de prestação de serviços',
-  locale:          'pt-BR',
-  auto_close:      true,
-  remind_interval: 3,
-  default_subject: 'Documentos aguardando sua assinatura',
-  default_message: 'Por favor, revise e assine os documentos em anexo.',
+```python
+envelope = client.notarial.envelopes.create(
+    name="Contrato de prestação de serviços",
+    locale="pt-BR",
+    auto_close=True,
+    remind_interval=3,
+    default_subject="Documentos aguardando sua assinatura",
+    default_message="Por favor, revise e assine os documentos em anexo.",
 )
 
-puts envelope.id     # => "uuid-do-envelope"
-puts envelope.status # => "draft"
+print(envelope.id)      # uuid do envelope
+print(envelope.status)  # draft
 ```
 
-> **`auto_close: true`** fecha o envelope automaticamente após todas as assinaturas.
-> **`remind_interval: 3`** envia lembretes automáticos a cada 3 dias.
+> **`auto_close=True`** fecha o envelope após todas as assinaturas.  
+> **`remind_interval=3`** envia lembretes automáticos a cada 3 dias (conforme regras da conta).
 
 ---
 
 ## 2. Adicionar o documento
 
-Envie o PDF em Base64. O arquivo deve estar no formato `data:<mime>;base64,<conteúdo>`.
+Envie o PDF em Base64 no formato `data:<mime>;base64,<conteúdo>`.
 
-```ruby
-pdf_base64 = "data:application/pdf;base64,#{Base64.strict_encode64(File.read('contrato.pdf'))}"
+```python
+import base64
 
-document = Document.create(
-  envelope_id:  envelope.id,
-  filename:     'contrato.pdf',
-  content_base64: pdf_base64,
+pdf_bytes = open("contrato.pdf", "rb").read()
+pdf_base64 = "data:application/pdf;base64," + base64.b64encode(pdf_bytes).decode()
+
+document = client.notarial.documents.create(
+    envelope.id,
+    filename="contrato.pdf",
+    content_base64=pdf_base64,
 )
 
-puts document.id       # => "uuid-do-documento"
-puts document.status   # => "draft"
+print(document.id)
+print(document.status)  # draft
 ```
 
-**Alternativas ao `content_base64`** (mutuamente exclusivas):
+Via classe (mesmo contrato):
 
-```ruby
-# A partir de URL pública:
-Document.create(envelope_id: envelope.id, filename: 'contrato.pdf',
-                content_url: 'https://meusite.com/contrato.pdf')
+```python
+from clicksign.resources.notarial.document import Document
 
-# A partir de template:
-Document.create(envelope_id: envelope.id, filename: 'contrato.docx',
-                template: { key: 'uuid-do-template', data: { cliente: 'ACME' } })
+document = Document.create(
+    envelope.id,
+    filename="contrato.pdf",
+    content_base64=pdf_base64,
+)
+```
+
+**Outros modos de criação** (mutuamente exclusivos na API — consulte [`SPEC.md`](SPEC.md)):
+
+```python
+# URL pública (quando suportado pela API)
+Document.create(envelope.id, filename="contrato.pdf", content_url="https://...")
+
+# Template (atributos conforme documentação Clicksign)
+Document.create(envelope.id, filename="contrato.docx", template_key="uuid-do-template")
 ```
 
 ---
 
 ## 3. Adicionar o signatário
 
-```ruby
-signer = Signer.create(
-  envelope_id:  envelope.id,
-  name:         'Maria Silva',
-  email:        'maria.silva@example.com',
-  phone_number: '11999998888',
-  refusable:    true,
-  communicate_events: {
-    signature_request:  'email',  # avisa o signatário quando enviado para assinar
-    signature_reminder: 'email',  # lembrete automático se não assinar
-    document_signed:    'email',  # confirmação após assinar
-  },
+```python
+signer = client.notarial.signers.create(
+    envelope.id,
+    name="Maria Silva",
+    email="maria.silva@example.com",
+    phone_number="11999998888",
+    has_documentation=True,
 )
 
-puts signer.id          # => "uuid-do-signer"
-puts signer.envelope_id # => "uuid-do-envelope"
+print(signer.id)
+print(signer.envelope_id)
 ```
 
-> **`refusable: true`** permite que o signatário recuse o documento.
-> **`communicate_events`** define o canal por tipo de evento (`signature_request`, `signature_reminder`, `document_signed`).
+> Canais de notificação (`communicate_events`, etc.) seguem o contrato JSON:API da Clicksign — passe atributos adicionais suportados pela API se necessário.
 
 ---
 
 ## 4. Criar os requisitos de assinatura
 
-Os requisitos definem **o que** o signatário deve fazer no documento.
+Os requisitos definem **o que** o signatário deve fazer em cada documento.
 
-### 4.1 Requisito de concordância (`agree`)
+Relacionamentos padrão documento + signatário:
 
-Exige que o signatário assine o documento.
+```python
+rels = {
+    "document": {"data": {"type": "documents", "id": document.id}},
+    "signer": {"data": {"type": "signers", "id": signer.id}},
+}
+```
 
-```ruby
+### 4.1 Concordância (`agree`)
+
+```python
+from clicksign.resources.notarial.requirement import Requirement
+
 agree = Requirement.create(
-  envelope_id: envelope.id,
-  action:      'agree',
-  role:        'sign',
-  relationships: {
-    document: { data: { type: 'documents', id: document.id } },
-    signer:   { data: { type: 'signers',   id: signer.id } },
-  },
+    envelope.id,
+    relationships=rels,
+    action="agree",
+    role="sign",
 )
 
-puts agree.id     # => "uuid-do-requisito-agree"
-puts agree.action # => "agree"
+print(agree.id, agree.action)
 ```
 
-### 4.2 Requisito de evidência de autenticação (`provide_evidence`)
+### 4.2 Evidência de autenticação (`provide_evidence`)
 
-Exige autenticação do signatário (e-mail, SMS, selfie, etc.).
-
-```ruby
+```python
 evidence = Requirement.create(
-  envelope_id: envelope.id,
-  action:      'provide_evidence',
-  auth:        'email',
-  relationships: {
-    document: { data: { type: 'documents', id: document.id } },
-    signer:   { data: { type: 'signers',   id: signer.id } },
-  },
+    envelope.id,
+    relationships=rels,
+    action="provide_evidence",
+    auth="email",
 )
 
-puts evidence.id     # => "uuid-do-requisito-evidence"
-puts evidence.action # => "provide_evidence"
-puts evidence.auth   # => "email"
+print(evidence.id, evidence.action)
 ```
 
-**Valores suportados para `auth`:** `email`, `sms`, `whatsapp`, `pix`, `selfie`, `liveness`, `handwritten`, `official_document`, `facial_biometrics`.
+**Valores comuns de `auth`:** `email`, `sms`, `whatsapp`, `pix`, `selfie`, `liveness`, `handwritten`, `official_document`, `facial_biometrics` (conforme conta/API).
 
 ---
 
 ## 5. Ativar o envelope
 
-Após configurar documentos, signatários e requisitos, atualize o `status` para `running` via PATCH. Isso inicia o fluxo de assinatura.
+Com documentos, signatários e requisitos prontos, altere o status para `running` (PATCH). Isso inicia o fluxo de assinatura.
 
-```ruby
-running_envelope = envelope.update(status: 'running')
-
-puts running_envelope.status # => "running"
+```python
+envelope.update(status="running")
+print(envelope.status)  # running
 ```
 
-> **Atenção:** após ativado, o envelope não pode mais receber novos requisitos. Qualquer tentativa retorna `ValidationError`. Ver [Troubleshooting — ValidationError](TROUBLESHOOTING.md#validationerror-400-422).
+Alternativa explícita (POST `/activate`):
+
+```python
+from clicksign.resources.notarial.envelope import Envelope
+
+envelope = Envelope.activate(envelope.id)
+```
+
+> **Atenção:** após ativado, novos requisitos em `draft` falham com `ValidationError`. Ver [Troubleshooting](TROUBLESHOOTING.md#validationerror-400-422).
 
 ---
 
-## 6. Enviar notificação ao signatário
+## 6. Notificar signatários
 
-Com o envelope em `running`, envie o link de assinatura por e-mail.
+Com o envelope em `running`, dispare o link de assinatura.
 
-### Via envelope (notifica todos os signatários pendentes)
+### Todos os signatários pendentes (envelope)
 
-```ruby
-envelope.notify(message: 'Seu contrato está disponível para assinatura.')
+```python
+envelope.notify(message="Seu contrato está disponível para assinatura.")
 ```
 
-### Via signatário (notifica um signatário específico)
+### Um signatário
 
-```ruby
-signer.notify(message: 'Lembrete: seu documento aguarda assinatura.')
-```
-
-### Com personalização de e-mail
-
-```ruby
+```python
+signer.notify(message="Lembrete: seu documento aguarda assinatura.")
 signer.notify(
-  message: 'Por favor, assine até sexta-feira.',
-  subject: 'Ação necessária: assinatura pendente',
+    message="Por favor, assine até sexta-feira.",
+    subject="Ação necessária: assinatura pendente",
 )
 ```
 
@@ -194,97 +212,118 @@ signer.notify(
 
 ## Fluxo completo (resumo)
 
-```ruby
-require 'clicksign'
+```python
+import base64
+import os
 
-Clicksign.configure do |c|
-  c.api_key     = ENV.fetch('CLICKSIGN_API_KEY')
-  c.environment = :sandbox
-end
+from clicksign import ClicksignClient
+from clicksign.resources.notarial.requirement import Requirement
 
-Envelope    = Clicksign::Resources::Notarial::Envelope
-Document    = Clicksign::Resources::Notarial::Document
-Signer      = Clicksign::Resources::Notarial::Signer
-Requirement = Clicksign::Resources::Notarial::Requirement
+client = ClicksignClient(
+    api_key=os.environ["CLICKSIGN_API_KEY"],
+    environment="sandbox",
+)
 
 # 1. Envelope
-envelope = Envelope.create(name: 'Contrato ACME', locale: 'pt-BR', auto_close: true)
+envelope = client.notarial.envelopes.create(
+    name="Contrato ACME",
+    locale="pt-BR",
+    auto_close=True,
+)
 
 # 2. Documento
-pdf_base64 = "data:application/pdf;base64,#{Base64.strict_encode64(File.read('contrato.pdf'))}"
-document = Document.create(envelope_id: envelope.id, filename: 'contrato.pdf',
-                           content_base64: pdf_base64)
+pdf_b64 = "data:application/pdf;base64," + base64.b64encode(
+    open("contrato.pdf", "rb").read()
+).decode()
+document = client.notarial.documents.create(
+    envelope.id,
+    filename="contrato.pdf",
+    content_base64=pdf_b64,
+)
 
 # 3. Signatário
-signer = Signer.create(
-  envelope_id: envelope.id,
-  name:        'Maria Silva',
-  email:       'maria@example.com',
-  refusable:   true,
+signer = client.notarial.signers.create(
+    envelope.id,
+    name="Maria Silva",
+    email="maria@example.com",
 )
 
 # 4. Requisitos
 rels = {
-  document: { data: { type: 'documents', id: document.id } },
-  signer:   { data: { type: 'signers',   id: signer.id } },
+    "document": {"data": {"type": "documents", "id": document.id}},
+    "signer": {"data": {"type": "signers", "id": signer.id}},
 }
+Requirement.create(envelope.id, relationships=rels, action="agree", role="sign")
+Requirement.create(
+    envelope.id,
+    relationships=rels,
+    action="provide_evidence",
+    auth="email",
+)
 
-Requirement.create(envelope_id: envelope.id, action: 'agree', role: 'sign',
-                   relationships: rels)
-Requirement.create(envelope_id: envelope.id, action: 'provide_evidence', auth: 'email',
-                   relationships: rels)
-
-# 5. Ativar — atualiza status para running via PATCH
-envelope.update(status: 'running')
+# 5. Ativar
+envelope.update(status="running")
 
 # 6. Notificar
-signer.notify(message: 'Seu contrato ACME está disponível para assinatura.')
+signer.notify(message="Seu contrato ACME está disponível para assinatura.")
 
-puts "Envelope #{envelope.id} ativo e signatário notificado."
+print(f"Envelope {envelope.id} ativo e signatário notificado.")
 ```
 
 ---
 
 ## Alternativa: requisitos em lote
 
-Para configurar todos os requisitos em uma única chamada HTTP, use `BulkRequirement`:
+Uma única requisição HTTP para vários requisitos (`BulkRequirement`):
 
-```ruby
-BulkRequirement = Clicksign::Resources::Notarial::BulkRequirement
+```python
+response = client.notarial.bulk_requirements.create(
+    envelope.id,
+    block=lambda ops: (
+        ops.add_agree(signer_id=signer.id, document_id=document.id, role="sign"),
+        ops.add_provide_evidence(
+            signer_id=signer.id,
+            document_id=document.id,
+            auth="email",
+        ),
+    ),
+)
 
-response = BulkRequirement.create(envelope_id: envelope.id) do |ops|
-  ops.add_agree(signer_id: signer.id, document_id: document.id, role: 'sign')
-  ops.add_provide_evidence(signer_id: signer.id, document_id: document.id, auth: 'email')
-end
-
-if response.success?
-  puts "#{response.requirements.size} requisitos criados."
-else
-  response.failures.each { |f| puts "Erro: #{f.errors}" }
-end
+if response.success():
+    print(len(response.requirements), "requisitos criados")
+else:
+    for failure in response.failures:
+        print(failure.index, failure.op, failure.errors)
 ```
 
-Detalhes: [examples/02-bulk-requirements.md](examples/02-bulk-requirements.md). Falha parcial sem exceção: [TROUBLESHOOTING.md](TROUBLESHOOTING.md#bulkrequirement--falha-parcial-sem-exceção).
+Detalhes: [examples/02-bulk-requirements.md](examples/02-bulk-requirements.md). Falha parcial: [TROUBLESHOOTING.md](TROUBLESHOOTING.md#bulkrequirement--falha-parcial-sem-exceção).
 
 ---
 
 ## Monitorar o progresso
 
-```ruby
-# Listar eventos do envelope
-Envelope.list_events(envelope.id).each do |event|
-  puts "#{event.name} — #{event.created}"
-end
+### Eventos e estado (API)
 
-# Listar signatários e status
-Envelope.list_signers(envelope.id).each do |s|
-  puts "#{s.name} <#{s.email}>"
-end
+```python
+from clicksign.resources.notarial.document import Document
+from clicksign.resources.notarial.envelope import Envelope
 
-# Recarregar estado atual do envelope
-envelope = envelope.reload
-puts envelope.status # "running", "closed", "cancelled"...
+for event in Envelope.list_events(envelope.id):
+    print(event.name, event.created)
+
+for event in Document.list_events(document.id, envelope_id=envelope.id):
+    print(event.name, event.data)
+
+for s in Envelope.list_signers(envelope.id):
+    print(s.name, s.email)
+
+envelope = client.notarial.envelopes.retrieve(envelope.id)
+print(envelope.status)  # running, closed, cancelled, ...
 ```
+
+### Webhooks (tempo real)
+
+Callbacks HTTP na sua aplicação — não confundir com o resource `Event` acima. Ver [examples/03-webhooks.md](examples/03-webhooks.md).
 
 ---
 
@@ -303,8 +342,9 @@ puts envelope.status # "running", "closed", "cancelled"...
 
 | Necessidade | Documento |
 |-------------|-----------|
-| Multi-conta / Sidekiq | [examples/04-multi-client.md](examples/04-multi-client.md) |
+| Multi-conta / workers | [examples/04-multi-client.md](examples/04-multi-client.md) |
 | Retries e timeouts | [examples/01-retries.md](examples/01-retries.md) |
-| Webhooks de eventos | [examples/03-webhooks.md](examples/03-webhooks.md) |
+| Webhooks | [examples/03-webhooks.md](examples/03-webhooks.md) |
 | Logs e métricas | [OBSERVABILITY.md](OBSERVABILITY.md) |
-| Erro inesperado | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) |
+| Erros comuns | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) |
+| Async / FastAPI | [README § Async](../README.md#async-fastapi-asyncio) |

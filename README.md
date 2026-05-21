@@ -76,7 +76,7 @@ clicksign.configure(
 envelopes = Envelope.list()
 envelope = Envelope.create(name="Contrato", locale="pt-BR")
 document = Document.create(
-    envelope_id=envelope.id,
+    envelope.id,
     filename="contrato.pdf",
     content_base64="...",
 )
@@ -196,14 +196,14 @@ envelope = client.notarial.envelopes.create(name="Contrato NDA", locale="pt-BR")
 
 # Adicionar documento
 doc = client.notarial.documents.create(
-    envelope_id=envelope.id,
+    envelope.id,
     filename="nda.pdf",
     content_base64="...",
 )
 
 # Adicionar signatário
 signer = client.notarial.signers.create(
-    envelope_id=envelope.id,
+    envelope.id,
     name="Ana Souza",
     email="ana@example.com",
     has_documentation=True,
@@ -240,7 +240,7 @@ envelope.update(deadline_at="2025-12-31T23:59:59Z")
 import base64
 
 doc = client.notarial.documents.create(
-    envelope_id=envelope.id,
+    envelope.id,
     filename="contrato.pdf",
     content_base64=base64.b64encode(open("contrato.pdf", "rb").read()).decode(),
 )
@@ -250,7 +250,7 @@ doc = client.notarial.documents.create(
 
 ```python
 signer = client.notarial.signers.create(
-    envelope_id=envelope.id,
+    envelope.id,
     name="João Silva",
     email="joao@example.com",
     has_documentation=True,
@@ -279,8 +279,18 @@ envelope.update(status="running")
 ### 6. Monitorar eventos
 
 ```python
-events = client.notarial.envelopes.retrieve(envelope.id)
-# ou via webhook: docs/examples/03-webhooks.md
+from clicksign.resources.notarial.envelope import Envelope
+
+for event in Envelope.list_events(envelope.id):
+    print(event.name, event.created)
+
+# Eventos por documento (ex.: read, sign, custom)
+from clicksign.resources.notarial.document import Document
+
+for event in Document.list_events(doc.id, envelope_id=envelope.id):
+    print(event.name, event.data)
+
+# Callbacks em tempo real: docs/examples/03-webhooks.md
 ```
 
 ---
@@ -327,6 +337,7 @@ print(envelopes[0].folder.name)  # sem chamada HTTP extra
 | `client.notarial.requirements` | `Requirement` |
 | `client.notarial.bulk_requirements` | `BulkRequirement` |
 | `client.notarial.signature_watchers` | `SignatureWatcher` |
+| — (nested) | `Event` — `Envelope.list_events`, `Document.list_events`, `Event.create_for_document` |
 | `client.webhooks` | `Webhook` |
 | `client.users` | `User` |
 | `client.templates` / `client.template_fields` | `Template`, `TemplateField` |
@@ -474,7 +485,7 @@ pytest
 pytest --cov=clicksign --cov-report=term-missing
 ruff format .
 ruff check .
-mypy src/
+mypy
 ```
 
 ---

@@ -107,6 +107,7 @@ class RequirementAttributes(TypedDict, total=False):
 class RequirementCreateParams(TypedDict, total=False):
     action: str
     role: str
+    auth: str
     rubricate: bool
 
 

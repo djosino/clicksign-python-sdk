@@ -6,13 +6,14 @@
 - Run with coverage: `pytest --cov=clicksign --cov-report=term-missing`
 - Format: `ruff format .`
 - Lint: `ruff check .`
-- Type check: `mypy src/`
+- Type check: `mypy`
 
 ## Key Locations
 
 ### Core HTTP stack
-- HTTP transport abstraction (Protocol): `src/clicksign/http_transport.py` — `UrllibHTTPClient`, `HttpxHTTPClient`, `HTTPClient` Protocol
-- Shared HTTP execution (retry, instrumentation, error mapping): `src/clicksign/http_executor.py`
+- HTTP transport: `src/clicksign/_http/transport.py` — `UrllibHTTPClient`, `HttpxHTTPClient`, `HTTPClient`
+- HTTP execution (retry, instrumentation, errors): `src/clicksign/_http/executor.py`
+- Async stack: `src/clicksign/_async/` — `AsyncClient`, `AsyncClicksignClient`
 - HTTP client (public API: get/post/patch/delete, raw_request): `src/clicksign/client.py`
 - Bulk operations client (atomic ops, timeout-only retry): `src/clicksign/json_api/bulk_operations_client.py`
 - Per-request options: `src/clicksign/request_options.py` — `RequestOptions(api_key, headers, timeouts)`

@@ -9,8 +9,8 @@
 | Documento | Para quê |
 |-----------|----------|
 | [`SDK_CONTRACT.md`](SDK_CONTRACT.md) | Contrato de comportamento (timeouts, retry, JSON:API, erros) |
-| [`WORKFLOW.md`](WORKFLOW.md) | Fluxo envelope → documento → signatário → ativação |
-| [`SPEC.md`](SPEC.md) | Rotas da API e mapa de resources |
+| [`WORKFLOW.md`](WORKFLOW.md) | Fluxo completo de assinatura (Python) |
+| [`SPEC.md`](SPEC.md) | Rotas da API e mapa de classes Python |
 | [`../README.md`](../README.md) | Instalação, exemplos rápidos, padrões de uso |
 
 ---
@@ -21,6 +21,7 @@
 |-----------|----------|
 | [`SDK_TEST_MATRIX.md`](SDK_TEST_MATRIX.md) | Cobertura de testes comportamentais (`tests/clicksign/`) |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Diagramas: request típico, bulk, webhooks |
+| [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) | Erros comuns (422, bulk parcial, webhooks, eventos) |
 
 ---
 

@@ -1,6 +1,6 @@
 # Examples — Clicksign SDK
 
-Receitas curtas por cenário. Exemplos Python salvo indicação; páginas legadas Ruby usam `require 'clicksign'`.
+Receitas curtas por cenário em Python. Fluxo completo de assinatura: [`WORKFLOW.md`](../WORKFLOW.md).
 
 | Receita | Quando usar |
 |---------|-------------|

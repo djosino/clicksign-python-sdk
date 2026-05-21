@@ -41,7 +41,7 @@ flowchart TB
   RES --> PARSER
 ```
 
-1. A app chama `client.envelopes.create(...)`, `Envelope.list()`, ou `Envelope.filter(...)` dentro de `Services.use()`.
+1. A app chama `client.notarial.envelopes.create(...)` (ou alias `client.envelopes`), `Envelope.list()`, ou `Envelope.filter(...)` dentro de `Services.use()`.
 2. `Resource` resolve o client: `threading.local` (dentro de `use`) ou client global de `configure()`.
 3. `Client` serializa JSON:API, aplica retry com jitter / `Retry-After`, publica hooks e mapeia erros HTTP.
 4. A resposta vira instâncias `Resource` com properties tipadas e `last_response`.
@@ -116,11 +116,11 @@ Sem `Services.use()` — client explícito por escopo.
 | Módulo | Responsabilidade |
 |--------|------------------|
 | `configuration.py` | Defaults globais (`configure`) |
-| `client.py` / `async_client.py` | HTTP JSON:API |
-| `http_transport.py` | `UrllibHTTPClient`, `HttpxHTTPClient` |
-| `http_executor.py` | Retry, instrumentation, logging |
-| `resource.py` | CRUD, `QueryProxy`, paginação |
-| `clicksign_client.py` | Facade + namespaces |
+| `client.py` / `_async/client.py` | HTTP JSON:API (sync / async) |
+| `_http/transport.py` | `UrllibHTTPClient`, `HttpxHTTPClient` |
+| `_http/executor.py` / `_async/http_executor.py` | Retry, instrumentation, logging |
+| `resource.py` / `_async/resource.py` | CRUD, `QueryProxy`, paginação |
+| `clicksign_client.py` / `_async/clicksign_client.py` | Facade + namespaces |
 | `json_api/*` | Serializer, parser, bulk |
 | `webhook.py` | HMAC + `construct_event` |
 | `instrumentation.py` | `on_request`, `on_retry`, `on_error` |
