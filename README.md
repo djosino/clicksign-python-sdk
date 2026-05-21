@@ -1,8 +1,9 @@
 # Clicksign Python SDK
 
-[![versão](https://img.shields.io/badge/versão-0.1.0-0066cc?style=flat-square)](CHANGELOG.md#010---2026-05-21)
+[![versão](https://img.shields.io/badge/versão-0.1.2-0066cc?style=flat-square)](CHANGELOG.md#012---2026-05-21)
 [![CI](https://github.com/djosino/clicksign-python-sdk/actions/workflows/ci.yml/badge.svg?branch=main&style=flat-square)](https://github.com/djosino/clicksign-python-sdk/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-3776AB?style=flat-square&logo=python&logoColor=white)](https://github.com/djosino/clicksign-python-sdk/actions/workflows/ci.yml)
+[![TestPyPI](https://img.shields.io/badge/TestPyPI-clicksign--python--sdk-3775A9?style=flat-square)](https://test.pypi.org/project/clicksign-python-sdk/)
 [![PyPI](https://img.shields.io/badge/PyPI-em%20breve-9cf?style=flat-square)](https://pypi.org/project/clicksign-python-sdk/)
 [![licença](https://img.shields.io/github/license/djosino/clicksign-python-sdk?style=flat-square&label=licença)](LICENSE)
 [![documentação](https://img.shields.io/badge/documentação-pt--BR-2563eb?style=flat-square)](docs/)

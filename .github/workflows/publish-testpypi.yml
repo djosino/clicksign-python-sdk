@@ -1,13 +1,13 @@
-# Publica no TestPyPI em push para branch release/<version> (ex.: release/0.1.1).
+# Publica no TestPyPI em push para branch release/<version> (ex.: release/0.1.2).
 #
-# Configuração única (Trusted Publishing — sem secret de API):
-#   1. https://test.pypi.org/manage/project/clicksign-python-sdk/settings/publishing/
-#   2. Add a new publisher → GitHub
-#   3. Owner: djosino | Repository: clicksign-python-sdk
-#   4. Workflow: publish-testpypi.yml | Environment: testpypi (ou vazio se não usar environment)
-#   5. No GitHub: Settings → Environments → criar "testpypi" (opcional; protege com approval)
+# Trusted Publishing (TestPyPI) — configurar UMA vez:
+#   https://test.pypi.org/manage/project/clicksign-python-sdk/settings/publishing/
+#   → Add publisher → GitHub
+#   → Owner: djosino | Repository: clicksign-python-sdk
+#   → Workflow name: publish-testpypi.yml
+#   → Environment name: (deixar VAZIO — o workflow não usa GitHub Environment)
 #
-# Alternativa com token: defina o secret TEST_PYPI_API_TOKEN e descomente o bloco "with:" abaixo.
+# Fallback com API token: secret TEST_PYPI_API_TOKEN + descomente username/password abaixo.
 
 name: Publish to TestPyPI
 
@@ -17,13 +17,17 @@ on:
       - "release/**"
   workflow_dispatch:
 
+concurrency:
+  group: publish-testpypi-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
+  contents: read
   id-token: write
 
 jobs:
-  publish:
+  validate:
     runs-on: ubuntu-latest
-    environment: testpypi
     steps:
       - uses: actions/checkout@v4
 
@@ -42,6 +46,27 @@ jobs:
             echo "release/$version != REVISION ($revision)"
             exit 1
           fi
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dev dependencies
+        run: python -m pip install --upgrade pip && pip install -e ".[dev]"
+
+      - name: Ruff
+        run: ruff check src tests && ruff format --check src tests
+
+      - name: Pytest
+        run: pytest -q --cov=clicksign --cov-fail-under=88
+        env:
+          PYTHONPATH: src
+
+  publish:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
