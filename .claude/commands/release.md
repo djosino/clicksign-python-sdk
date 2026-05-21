@@ -8,5 +8,6 @@ Prepare uma nova release do SDK:
 6. Após confirmação, oriente a branch de release `release/<version>` — ver `docs/RELEASE.md`
    - Commit REVISION + CHANGELOG no `main`, push
    - `git checkout -b release/X.Y.Z` e `git push -u origin release/X.Y.Z`
-   - CI publica no TestPyPI (Trusted Publishing; environment no TestPyPI deve ficar **vazio**)
+   - CI publica no TestPyPI (secret `TEST_PYPI_API_TOKEN`)
    - Branch `release/X.Y.Z` deve coincidir com `REVISION`
+   - Após validar no TestPyPI: merge no `main`, depois Actions → Publish to PyPI (secret `PYPI_API_TOKEN`) — ver `docs/RELEASE.md`
