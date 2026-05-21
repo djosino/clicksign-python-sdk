@@ -136,7 +136,11 @@ class ProviderTelemetry:
         self._worker = None
 
     def _start_worker(self) -> None:
-        self._worker = threading.Thread(target=self._worker_loop, name="clicksign-telemetry", daemon=True)
+        self._worker = threading.Thread(
+            target=self._worker_loop,
+            name="clicksign-telemetry",
+            daemon=True,
+        )
         self._worker.start()
 
     def _worker_loop(self) -> None:

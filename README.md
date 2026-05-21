@@ -2,7 +2,7 @@
 
 Python client for the [Clicksign API v3](https://developers.clicksign.com/) (JSON:API).
 
-**Status:** work in progress — see `docs/SDK_CONTRACT.md` for the full specification.
+**Status:** beta — core notarial + admin resources, sync/async clients, webhooks, pagination, and observability hooks. See [`docs/SDK_CONTRACT.md`](docs/SDK_CONTRACT.md) and [`docs/SDK_ROADMAP.md`](docs/SDK_ROADMAP.md).
 
 **Reference implementation:** [`../clicksign-ruby-sdk`](../clicksign-ruby-sdk)
 
@@ -18,6 +18,30 @@ Python client for the [Clicksign API v3](https://developers.clicksign.com/) (JSO
 | [`SDK_CLIENT_GAPS.md`](docs/SDK_CLIENT_GAPS.md) | [`SDK_ROADMAP.md`](docs/SDK_ROADMAP.md), [`SDK_TEST_MATRIX.md`](docs/SDK_TEST_MATRIX.md) |
 | [`OBSERVABILITY.md`](docs/OBSERVABILITY.md) | [`PAGINATION.md`](docs/PAGINATION.md), [`TYPES.md`](docs/TYPES.md) |
 | [`cookbook/`](docs/cookbook/) | [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
+
+### API surface (`ClicksignClient`)
+
+| Namespace | Resource | Import alternativo |
+|-----------|----------|-------------------|
+| `client.notarial.envelopes` | `Envelope` | `from clicksign import Envelope` |
+| `client.notarial.documents` | `Document` | `from clicksign import Document` |
+| `client.notarial.signers` | `Signer` | `from clicksign import Signer` |
+| `client.notarial.requirements` | `Requirement` | `from clicksign import Requirement` |
+| `client.notarial.bulk_requirements` | `BulkRequirement` | `from clicksign import BulkRequirement` |
+| `client.notarial.signature_watchers` | `SignatureWatcher` | `from clicksign.resources.notarial.signature_watcher import SignatureWatcher` |
+| `client.notarial.events` | `Event` (notarial) | `from clicksign.resources.notarial.event import Event` |
+| `client.webhooks` | `Webhook` | `from clicksign.resources.webhook import Webhook` |
+| `client.users` | `User` | `from clicksign.resources.user import User` |
+| `client.templates` / `template_fields` | `Template`, `TemplateField` | `from clicksign.resources.template import Template` |
+| `client.memberships` / `groups` | `Membership`, `Group` | imports em `clicksign.resources.*` |
+| `client.folders` | `Folder` | `from clicksign.resources.folder import Folder` |
+| `client.events` | `Event` (conta) | `from clicksign.resources.event import Event` |
+| `client.access_control_lists` | `AccessControlList` | `from clicksign.resources.access_control_list import AccessControlList` |
+| `client.envelope_bulk_creations` | `EnvelopeBulkCreation` | import direto do módulo |
+| `client.acceptance_term.whatsapps` | `Whatsapp` | `from clicksign.resources.acceptance_term.whatsapp import Whatsapp` |
+| `client.auto_signature.terms` | `Term` | `from clicksign.resources.auto_signature.term import Term` |
+
+Endpoints sem resource dedicado: `client.raw_request()` + `client.deserialize()`.
 
 ---
 

@@ -101,7 +101,9 @@ class ClicksignClient:
             from . import _config
 
             resolved_enable = _config.enable_telemetry
-            resolved_telemetry_url = telemetry_url if telemetry_url is not None else _config.telemetry_url
+            resolved_telemetry_url = (
+                telemetry_url if telemetry_url is not None else _config.telemetry_url
+            )
         else:
             resolved_enable = enable_telemetry
             resolved_telemetry_url = telemetry_url

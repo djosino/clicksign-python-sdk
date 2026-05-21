@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import http.client
-import json
 import ssl
 import urllib.error
 import urllib.parse
@@ -96,7 +95,8 @@ class UrllibHTTPClient:
         body: bytes | None,
         timeout: float,
     ) -> HTTPResponse:
-        handlers: list[Any] = [urllib.request.ProxyHandler({"http": self._proxy, "https": self._proxy})]
+        proxy_map = {"http": self._proxy, "https": self._proxy}
+        handlers: list[Any] = [urllib.request.ProxyHandler(proxy_map)]
         if not self._verify_ssl_certs:
             handlers.append(urllib.request.HTTPSHandler(context=ssl._create_unverified_context()))
         opener = urllib.request.build_opener(*handlers)
@@ -163,7 +163,7 @@ class UrllibHTTPClient:
                 conn.sock.settimeout(read_timeout)
             raw = conn.getresponse()
             response_body = raw.read().decode("utf-8")
-            resp_headers = {k: v for k, v in raw.getheaders()}
+            resp_headers = dict(raw.getheaders())
             if raw.status >= 400:
                 raise HTTPStatusError(raw.status, response_body, resp_headers)
             return HTTPResponse(status=raw.status, body=response_body, headers=resp_headers)

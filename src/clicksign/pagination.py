@@ -19,7 +19,8 @@ def resolve_page_size(per: int | None) -> int:
         raise ValueError(f"page size must be >= 1, got {per}")
     if per > MAX_PAGE_SIZE:
         raise ValueError(
-            f"page size must be <= {MAX_PAGE_SIZE} (Clicksign API limit documented in pagination guide), "
+            f"page size must be <= {MAX_PAGE_SIZE} "
+            "(Clicksign API limit documented in pagination guide), "
             f"got {per}"
         )
     return per

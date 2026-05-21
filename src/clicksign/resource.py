@@ -320,7 +320,9 @@ class Resource:
         if client.last_response is not None:
             self._last_response = client.last_response
 
-    async def reload_async(self, *, options: RequestOptions | dict[str, Any] | None = None) -> Resource:
+    async def reload_async(
+        self, *, options: RequestOptions | dict[str, Any] | None = None
+    ) -> Resource:
         client = self._resolve_async_client()
         response = await client.get(self._build_path(), options=options)
         instances, _ = self._parse_response(response)
