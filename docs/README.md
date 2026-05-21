@@ -40,18 +40,18 @@
 
 | Receita | Tema |
 |---------|------|
-| [`cookbook/01-retries.md`](cookbook/01-retries.md) | Timeouts, `max_retries`, bulk vs client |
-| [`cookbook/02-bulk-requirements.md`](cookbook/02-bulk-requirements.md) | Operações atômicas |
-| [`cookbook/03-webhooks.md`](cookbook/03-webhooks.md) | HMAC, `construct_event` |
-| [`cookbook/04-multi-client.md`](cookbook/04-multi-client.md) | Multi-tenant, `Services`, `ClicksignClient` |
-| [`cookbook/07-list-and-filter.md`](cookbook/07-list-and-filter.md) | `list` vs `filter` |
-| [`cookbook/08-production-limitations.md`](cookbook/08-production-limitations.md) | Sem pool no default, asyncio |
-| [`cookbook/09-observability-structlog.md`](cookbook/09-observability-structlog.md) | structlog |
-| [`cookbook/10-observability-opentelemetry.md`](cookbook/10-observability-opentelemetry.md) | OpenTelemetry manual |
-| [`cookbook/11-observability-metrics.md`](cookbook/11-observability-metrics.md) | Prometheus / StatsD |
-| [`cookbook/12-http-connection-pool.md`](cookbook/12-http-connection-pool.md) | `HttpxHTTPClient` singleton |
+| [`examples/01-retries.md`](examples/01-retries.md) | Timeouts, `max_retries`, bulk vs client |
+| [`examples/02-bulk-requirements.md`](examples/02-bulk-requirements.md) | Operações atômicas |
+| [`examples/03-webhooks.md`](examples/03-webhooks.md) | HMAC, `construct_event` |
+| [`examples/04-multi-client.md`](examples/04-multi-client.md) | Multi-tenant, `Services`, `ClicksignClient` |
+| [`examples/07-list-and-filter.md`](examples/07-list-and-filter.md) | `list` vs `filter` |
+| [`examples/08-production-limitations.md`](examples/08-production-limitations.md) | Sem pool no default, asyncio |
+| [`examples/09-observability-structlog.md`](examples/09-observability-structlog.md) | structlog |
+| [`examples/10-observability-opentelemetry.md`](examples/10-observability-opentelemetry.md) | OpenTelemetry manual |
+| [`examples/11-observability-metrics.md`](examples/11-observability-metrics.md) | Prometheus / StatsD |
+| [`examples/12-http-connection-pool.md`](examples/12-http-connection-pool.md) | `HttpxHTTPClient` singleton |
 
-Índice do cookbook: [`cookbook/README.md`](cookbook/README.md).
+Índice do examples: [`examples/README.md`](examples/README.md).
 
 ---
 
@@ -59,6 +59,6 @@
 
 1. Comportamento novo → atualizar `SDK_CONTRACT.md` + teste em `tests/clicksign/` + linha em `SDK_TEST_MATRIX.md`.
 2. Gap só no cliente → `SDK_CLIENT_GAPS.md`; depende da API → `SDK_ROADMAP.md` §15–18.
-3. Receita copiável → novo arquivo em `cookbook/` e linha neste README + `cookbook/README.md`.
+3. Receita copiável → novo arquivo em `examples/` e linha neste README + `examples/README.md`.
 
 **Última revisão geral:** maio/2026 (§9 SDK_CLIENT_GAPS).

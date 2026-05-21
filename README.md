@@ -10,14 +10,14 @@ Python client for the [Clicksign API v3](https://developers.clicksign.com/) (JSO
 
 ## Documentation
 
-**Index:** [`docs/README.md`](docs/README.md) — mapa por tema (contrato, gaps, cookbook, observabilidade, paginação).
+**Index:** [`docs/README.md`](docs/README.md) — mapa por tema (contrato, gaps, examples, observabilidade, paginação).
 
 | Start here | Also |
 |------------|------|
 | [`SDK_CONTRACT.md`](docs/SDK_CONTRACT.md) | [`SPEC.md`](docs/SPEC.md), [`WORKFLOW.md`](docs/WORKFLOW.md) |
 | [`SDK_CLIENT_GAPS.md`](docs/SDK_CLIENT_GAPS.md) | [`SDK_ROADMAP.md`](docs/SDK_ROADMAP.md), [`SDK_TEST_MATRIX.md`](docs/SDK_TEST_MATRIX.md) |
 | [`OBSERVABILITY.md`](docs/OBSERVABILITY.md) | [`PAGINATION.md`](docs/PAGINATION.md), [`TYPES.md`](docs/TYPES.md) |
-| [`cookbook/`](docs/cookbook/) | [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
+| [`examples/`](docs/examples/) | [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 
 ### API surface (`ClicksignClient`)
 
@@ -164,7 +164,7 @@ clicksign.configure(api_key="...", environment="production", http_client=http)
 
 `AsyncClicksignClient` (`clicksign[async]`) also uses `httpx` with a connection pool on the event loop.
 
-Trade-offs and mitigations: [`docs/cookbook/08-production-limitations.md`](docs/cookbook/08-production-limitations.md) · singleton recipe: [`docs/cookbook/12-http-connection-pool.md`](docs/cookbook/12-http-connection-pool.md).
+Trade-offs and mitigations: [`docs/examples/08-production-limitations.md`](docs/examples/08-production-limitations.md) · singleton recipe: [`docs/examples/12-http-connection-pool.md`](docs/examples/12-http-connection-pool.md).
 
 ### Multi-tenant (thread-local)
 
@@ -322,9 +322,9 @@ Metrics include SDK version, Python version, HTTP method, normalized path (UUIDs
 | `configure()` + resources | One API key per process; scripts; legacy style |
 | `ClicksignClient` | Multiple keys; explicit dependencies; new application code |
 | `Services.use()` | Multi-tenant Rails/Django/Celery-style apps (one thread per request/job) |
-| `HttpxHTTPClient` (shared) | High QPS per worker; see [connection pool](docs/cookbook/12-http-connection-pool.md) |
+| `HttpxHTTPClient` (shared) | High QPS per worker; see [connection pool](docs/examples/12-http-connection-pool.md) |
 
-See [`docs/WORKFLOW.md`](docs/WORKFLOW.md) for a full signing workflow and [`docs/cookbook/`](docs/cookbook/) for scenario-specific recipes.
+See [`docs/WORKFLOW.md`](docs/WORKFLOW.md) for a full signing workflow and [`docs/examples/`](docs/examples/) for scenario-specific recipes.
 
 ---
 

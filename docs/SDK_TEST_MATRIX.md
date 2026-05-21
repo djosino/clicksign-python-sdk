@@ -149,4 +149,4 @@ Adicionar testes ao criar novos métodos em [`SDK_CLIENT_GAPS.md`](SDK_CLIENT_GA
 | Client retenta 429/5xx/timeout | `test_client.py` |
 | Bulk retenta só timeout | `test_bulk_operations_client.py` (`test_does_not_retry_on_server_error`) |
 
-Ver [`cookbook/01-retries.md`](cookbook/01-retries.md).
+Ver [`examples/01-retries.md`](examples/01-retries.md).

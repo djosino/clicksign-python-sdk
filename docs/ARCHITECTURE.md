@@ -130,4 +130,4 @@ Sem `Services.use()` — client explícito por escopo.
 ## Referência
 
 - Índice de docs: [`README.md`](README.md)
-- Limitações produção: [`cookbook/08-production-limitations.md`](cookbook/08-production-limitations.md)
+- Limitações produção: [`examples/08-production-limitations.md`](examples/08-production-limitations.md)

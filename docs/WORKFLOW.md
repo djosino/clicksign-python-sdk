@@ -2,7 +2,7 @@
 
 Este guia percorre o ciclo de vida completo de um envelope: criação, adição de documento e signatário, configuração dos requisitos de assinatura, ativação e notificação.
 
-**Documentação relacionada:** [Cookbook](cookbook/) (receitas) · [Troubleshooting](TROUBLESHOOTING.md) (erros comuns) · [Arquitetura](ARCHITECTURE.md) · [Observabilidade](OBSERVABILITY.md)
+**Documentação relacionada:** [Cookbook](examples/) (receitas) · [Troubleshooting](TROUBLESHOOTING.md) (erros comuns) · [Arquitetura](ARCHITECTURE.md) · [Observabilidade](OBSERVABILITY.md)
 
 ---
 
@@ -264,7 +264,7 @@ else
 end
 ```
 
-Detalhes: [cookbook/02-bulk-requirements.md](cookbook/02-bulk-requirements.md). Falha parcial sem exceção: [TROUBLESHOOTING.md](TROUBLESHOOTING.md#bulkrequirement--falha-parcial-sem-exceção).
+Detalhes: [examples/02-bulk-requirements.md](examples/02-bulk-requirements.md). Falha parcial sem exceção: [TROUBLESHOOTING.md](TROUBLESHOOTING.md#bulkrequirement--falha-parcial-sem-exceção).
 
 ---
 
@@ -303,8 +303,8 @@ puts envelope.status # "running", "closed", "cancelled"...
 
 | Necessidade | Documento |
 |-------------|-----------|
-| Multi-conta / Sidekiq | [cookbook/04-multi-client.md](cookbook/04-multi-client.md) |
-| Retries e timeouts | [cookbook/01-retries.md](cookbook/01-retries.md) |
-| Webhooks de eventos | [cookbook/03-webhooks.md](cookbook/03-webhooks.md) |
+| Multi-conta / Sidekiq | [examples/04-multi-client.md](examples/04-multi-client.md) |
+| Retries e timeouts | [examples/01-retries.md](examples/01-retries.md) |
+| Webhooks de eventos | [examples/03-webhooks.md](examples/03-webhooks.md) |
 | Logs e métricas | [OBSERVABILITY.md](OBSERVABILITY.md) |
 | Erro inesperado | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) |

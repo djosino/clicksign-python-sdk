@@ -71,7 +71,7 @@ Detalhes por § abaixo permanecem como histórico; gaps abertos do cliente: [`SD
 - [ ] Avaliar `HttpxHTTPClient` como transporte **default** (breaking: dependência de runtime `httpx`)
 - [ ] Se mudar default: major version + guia de migração (`UrllibHTTPClient` explícito para quem quiser stdlib-only)
 
-Documentado em v1: [`cookbook/12-http-connection-pool.md`](cookbook/12-http-connection-pool.md), [`08-production-limitations.md`](cookbook/08-production-limitations.md).
+Documentado em v1: [`examples/12-http-connection-pool.md`](examples/12-http-connection-pool.md), [`08-production-limitations.md`](examples/08-production-limitations.md).
 
 ---
 
@@ -378,7 +378,7 @@ Ver [`docs/TYPES.md`](TYPES.md).
 ### Checklist
 
 - [x] Comportamento documentado em `SDK_CONTRACT.md` §6
-- [x] Tabela em `docs/cookbook/01-retries.md`
+- [x] Tabela em `docs/examples/01-retries.md`
 - [x] Teste `test_does_not_retry_on_server_error` em bulk client
 - [x] Decisão: retry de 429 no bulk — **não** (sem idempotência)
 - [x] Documentar assimetria Client vs Bulk (este §17)
@@ -418,8 +418,8 @@ Itens §2–§14, §16–§17 (exceto N/A §15, §18). Ver lista **Já implement
 
 | Item | Nota |
 |------|------|
-| stdlib default sem pool | [`cookbook/08-production-limitations.md`](cookbook/08-production-limitations.md) |
-| Bulk sem retry 5xx/429 | `SDK_CONTRACT.md` §6, [`01-retries.md`](cookbook/01-retries.md) |
+| stdlib default sem pool | [`examples/08-production-limitations.md`](examples/08-production-limitations.md) |
+| Bulk sem retry 5xx/429 | `SDK_CONTRACT.md` §6, [`01-retries.md`](examples/01-retries.md) |
 | Retry 409 / idempotência | API não suporta |
 
 ---

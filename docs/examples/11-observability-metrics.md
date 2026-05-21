@@ -87,7 +87,7 @@ clicksign.on_request(on_request_prom)
 
 **Não** incremente métricas com labels derivados de `response_body` ou atributos de signatários. Use apenas `method`, `path` normalizado, `status`, `error` class name.
 
-Em logs/APM paralelos, o mesmo vale para `on_error` — veja structlog cookbook.
+Em logs/APM paralelos, o mesmo vale para `on_error` — veja structlog examples.
 
 ## Referência
 

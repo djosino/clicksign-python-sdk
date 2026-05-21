@@ -116,7 +116,7 @@ clicksign.set_log("debug")
 clicksign.on_request(lambda e: logger.info("clicksign.request", extra=e))
 ```
 
-Cookbook structlog: [`cookbook/09-observability-structlog.md`](cookbook/09-observability-structlog.md).
+Cookbook structlog: [`examples/09-observability-structlog.md`](examples/09-observability-structlog.md).
 
 ---
 
@@ -149,8 +149,8 @@ O logger integrado da SDK (`CLICKSIGN_LOG=debug`) trunca bodies e redige `Author
 
 ## Python — OpenTelemetry e métricas
 
-- OpenTelemetry manual: [`cookbook/10-observability-opentelemetry.md`](cookbook/10-observability-opentelemetry.md)
-- Prometheus / StatsD via hooks: [`cookbook/11-observability-metrics.md`](cookbook/11-observability-metrics.md)
+- OpenTelemetry manual: [`examples/10-observability-opentelemetry.md`](examples/10-observability-opentelemetry.md)
+- Prometheus / StatsD via hooks: [`examples/11-observability-metrics.md`](examples/11-observability-metrics.md)
 
 Não há módulo `clicksign.metrics` no core — hooks são o ponto de extensão.
 
@@ -321,13 +321,13 @@ Em specs que registram `on_request`, chame `Instrumentation.clear` no `after` do
 - Spans OTel embutidos
 - Export automático para Datadog/New Relic
 - Correlação `request_id` da API com trace ID (você pode copiar `e[:error].request_id` para o span manualmente)
-- Retry automático em 5xx/429 no `BulkOperationsClient` (só timeout; ver [01-retries](cookbook/01-retries.md))
+- Retry automático em 5xx/429 no `BulkOperationsClient` (só timeout; ver [01-retries](examples/01-retries.md))
 
 ---
 
 ## Referência
 
 - README: [Timeouts, retry e instrumentação](../README.md#timeouts-retry-e-instrumentação)
-- Retries: [cookbook/01-retries.md](cookbook/01-retries.md)
+- Retries: [examples/01-retries.md](examples/01-retries.md)
 - Arquitetura dos hooks: [ARCHITECTURE.md](ARCHITECTURE.md)
 - Falhas silenciosas em callback: [TROUBLESHOOTING.md](TROUBLESHOOTING.md#instrumentação-some-erro-do-callback)
