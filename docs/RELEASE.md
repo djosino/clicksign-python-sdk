@@ -10,19 +10,30 @@ Fluxo de versão do SDK. Branches de release: **`release/<version>`** (ex.: `rel
 |------|------|
 | `REVISION` | Arquivo na raiz — só o número (ex.: `0.1.2`) |
 | `CHANGELOG.md` | Seção `[X.Y.Z] - AAAA-MM-DD` |
-| Trusted Publisher (TestPyPI) | [Publishing settings](https://test.pypi.org/manage/project/clicksign-python-sdk/settings/publishing/) |
+| Secret `TEST_PYPI_API_TOKEN` | GitHub → Settings → Secrets → Actions (token de **test.pypi.org**) |
 
-### Trusted Publishing (TestPyPI)
+### Secret no GitHub (padrão do CI)
 
-1. **Add publisher** → GitHub  
-2. **Owner:** `djosino`  
-3. **Repository:** `clicksign-python-sdk`  
-4. **Workflow name:** `publish-testpypi.yml`  
-5. **Environment name:** *(vazio — não preencher)*  
+1. Crie token em https://test.pypi.org/manage/account/token/ (escopo: projeto `clicksign-python-sdk`)
+2. No repositório: **Settings → Secrets and variables → Actions → New repository secret**
+3. Nome: `TEST_PYPI_API_TOKEN` | Valor: `pypi-...` (token completo)
 
-O workflow **não** usa `environment:` no GitHub. Se o publisher no TestPyPI tiver `testpypi` no environment, o upload falha com `invalid-publisher`.
+O workflow usa `username: __token__` + esse secret (mesmo fluxo do `twine upload` manual).
 
-**Fallback:** secret `TEST_PYPI_API_TOKEN` no repositório e linhas `username`/`password` descomentadas em `.github/workflows/publish-testpypi.yml`.
+### Trusted Publishing (opcional, sem secret)
+
+Só se quiser OIDC em vez de token — em [Publishing settings](https://test.pypi.org/manage/project/clicksign-python-sdk/settings/publishing/):
+
+| Campo | Valor |
+|--------|--------|
+| Owner | `djosino` |
+| Repository | `clicksign-python-sdk` |
+| Workflow | `publish-testpypi.yml` |
+| Environment | *(vazio)* |
+
+Apague publishers antigos com Environment `testpypi`. Remova `username`/`password` do workflow para voltar ao OIDC.
+
+**`invalid-publisher`:** o claim `sub` deve ser `repo:djosino/clicksign-python-sdk:ref:refs/heads/release/X.Y.Z` — confira owner/repo/workflow no TestPyPI (não em pypi.org).
 
 ---
 

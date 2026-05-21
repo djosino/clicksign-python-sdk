@@ -1,13 +1,13 @@
 # Publica no TestPyPI em push para branch release/<version> (ex.: release/0.1.2).
 #
-# Trusted Publishing (TestPyPI) — configurar UMA vez:
-#   https://test.pypi.org/manage/project/clicksign-python-sdk/settings/publishing/
-#   → Add publisher → GitHub
-#   → Owner: djosino | Repository: clicksign-python-sdk
-#   → Workflow name: publish-testpypi.yml
-#   → Environment name: (deixar VAZIO — o workflow não usa GitHub Environment)
+# Obrigatório: secret TEST_PYPI_API_TOKEN (token de https://test.pypi.org, escopo no projeto).
+#   GitHub → Settings → Secrets and variables → Actions → New repository secret
 #
-# Fallback com API token: secret TEST_PYPI_API_TOKEN + descomente username/password abaixo.
+# Opcional (sem secret): Trusted Publishing em
+#   https://test.pypi.org/manage/project/clicksign-python-sdk/settings/publishing/
+#   GitHub publisher: Owner djosino, Repo clicksign-python-sdk,
+#   Workflow publish-testpypi.yml, Environment (VAZIO).
+#   Remova username/password do step Publish para usar só OIDC.
 
 name: Publish to TestPyPI
 
@@ -78,9 +78,9 @@ jobs:
       - name: Build sdist and wheel
         run: python -m build
 
-      - name: Publish to TestPyPI
+      - name: Publish to TestPyPI (API token)
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-          # username: __token__
-          # password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          username: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
