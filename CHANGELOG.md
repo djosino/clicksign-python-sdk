@@ -11,6 +11,19 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [0.1.2] - 2026-05-21
+
+### Adicionado
+
+- CI: workflow `publish-testpypi.yml` — publica no TestPyPI em push para `release/<version>`
+- Documentação de release em `docs/RELEASE.md`
+
+### Corrigido
+
+- Trusted Publishing: workflow sem GitHub Environment (evita `invalid-publisher` no TestPyPI)
+
+---
+
 ## [0.1.1] - 2026-05-21
 
 ### Alterado
