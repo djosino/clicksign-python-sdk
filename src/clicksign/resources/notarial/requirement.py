@@ -99,18 +99,22 @@ class Requirement(Resource):
 
     @classmethod
     def list_for_document(cls, document_id: str, **filters: Any) -> list[Requirement]:
+        from ...json_api.query_builder import QueryBuilder
+
         client = cls._get_client()
         path = f"/documents/{document_id}/relationships/requirements"
-        params = {f"filter[{k}]": str(v) for k, v in filters.items()} if filters else None
+        params = QueryBuilder().filter(**filters).to_params() if filters else None
         response = client.get(path, params)
         instances, _ = cls._parse_response(response)
         return instances  # type: ignore[return-value]
 
     @classmethod
     def list_for_signer(cls, signer_id: str, **filters: Any) -> list[Requirement]:
+        from ...json_api.query_builder import QueryBuilder
+
         client = cls._get_client()
         path = f"/signers/{signer_id}/relationships/requirements"
-        params = {f"filter[{k}]": str(v) for k, v in filters.items()} if filters else None
+        params = QueryBuilder().filter(**filters).to_params() if filters else None
         response = client.get(path, params)
         instances, _ = cls._parse_response(response)
         return instances  # type: ignore[return-value]
