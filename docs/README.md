@@ -12,6 +12,7 @@
 | [`WORKFLOW.md`](WORKFLOW.md) | Fluxo completo de assinatura (Python) |
 | [`SPEC.md`](SPEC.md) | Rotas da API e mapa de classes Python |
 | [`../README.md`](../README.md) | Instalação, exemplos rápidos, padrões de uso |
+| [`RELEASE.md`](RELEASE.md) | Branch `release/<version>`, TestPyPI (CI), PyPI produção |
 
 ---
 

@@ -5,7 +5,8 @@ Prepare uma nova release do SDK:
 3. Atualize o arquivo REVISION com apenas o novo número de versão
 4. Atualize o CHANGELOG.md com as mudanças agrupadas (Added, Changed, Fixed, Removed)
 5. Mostre o diff e aguarde confirmação antes de commitar
-6. Após confirmação, oriente a branch de release: `release/<version>` (ex.: `release/0.1.2`)
-   - `git checkout -b release/0.1.2` (a partir de `main` com REVISION/CHANGELOG já atualizados)
-   - `git push -u origin release/0.1.2` → dispara `.github/workflows/publish-testpypi.yml` (TestPyPI)
-   - A branch deve coincidir com `REVISION` (`release/0.1.2` + `REVISION=0.1.2`)
+6. Após confirmação, oriente a branch de release `release/<version>` — ver `docs/RELEASE.md`
+   - Commit REVISION + CHANGELOG no `main`, push
+   - `git checkout -b release/X.Y.Z` e `git push -u origin release/X.Y.Z`
+   - CI publica no TestPyPI (Trusted Publishing; environment no TestPyPI deve ficar **vazio**)
+   - Branch `release/X.Y.Z` deve coincidir com `REVISION`
