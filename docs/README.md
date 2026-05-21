@@ -19,7 +19,6 @@
 
 | Documento | Para quê |
 |-----------|----------|
-| [`SDK_ROADMAP.md`](SDK_ROADMAP.md) | Checklist histórico de features do SDK + decisões de design |
 | [`SDK_TEST_MATRIX.md`](SDK_TEST_MATRIX.md) | Cobertura de testes comportamentais (`tests/clicksign/`) |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Diagramas: request típico, bulk, webhooks |
 

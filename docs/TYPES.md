@@ -77,6 +77,6 @@ pytest -q
 
 ## Próximos passos (fora do §4)
 
-- Resources admin restantes (`AccessControlList`, `EnvelopeBulkCreation`, …) conforme [`SPEC.md`](SPEC.md) e [`SDK_ROADMAP.md`](SDK_ROADMAP.md)
+- Resources admin restantes (`AccessControlList`, `EnvelopeBulkCreation`, …) conforme [`SPEC.md`](SPEC.md)
 - `Required[...]` em create params quando a API publicar obrigatoriedade
 - Integrar OpenAPI da Clicksign no gerador quando disponível

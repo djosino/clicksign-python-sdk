@@ -97,4 +97,3 @@ Async: [`README` — Async](../../README.md#async-fastapi-asyncio) · multi-cont
 
 - README: [HTTP transport and connection pool](../../README.md#http-transport-and-connection-pool)
 - Arquitetura: [`ARCHITECTURE.md`](../ARCHITECTURE.md)
-- Roadmap v2 (httpx como default?): [`SDK_ROADMAP.md`](../SDK_ROADMAP.md) §1

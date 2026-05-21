@@ -1,64 +1,68 @@
 # Clicksign Python SDK
 
-Cliente Python para a [Clicksign API v3](https://developers.clicksign.com/) (JSON:API).
+[![PyPI](https://img.shields.io/pypi/v/clicksign)](https://pypi.org/project/clicksign/)
+[![CI](https://github.com/djosino/clicksign-python-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/djosino/clicksign-python-sdk/actions)
+[![Python](https://img.shields.io/pypi/pyversions/clicksign)](https://pypi.org/project/clicksign/)
+[![License](https://img.shields.io/pypi/l/clicksign)](LICENSE)
 
-**Status:** beta — recursos notariais e administrativos principais, clientes sync/async, webhooks, paginação e hooks de observabilidade. Veja [`docs/SDK_CONTRACT.md`](docs/SDK_CONTRACT.md) e [`docs/SDK_ROADMAP.md`](docs/SDK_ROADMAP.md).
-
-**Implementação de referência:** [`../clicksign-ruby-sdk`](../clicksign-ruby-sdk)
-
----
-
-## Documentação
-
-**Índice:** [`docs/README.md`](docs/README.md) — mapa por tema (contrato, roadmap, exemplos, observabilidade, paginação).
-
-| Comece aqui | Também |
-|------------|------|
-| [`SDK_CONTRACT.md`](docs/SDK_CONTRACT.md) | [`SPEC.md`](docs/SPEC.md), [`WORKFLOW.md`](docs/WORKFLOW.md) |
-| [`OBSERVABILITY.md`](docs/OBSERVABILITY.md) | [`PAGINATION.md`](docs/PAGINATION.md), [`TYPES.md`](docs/TYPES.md) |
-| [`examples/`](docs/examples/) | [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
-
-### Superfície da API (`ClicksignClient`)
-
-| Namespace | Resource | Import alternativo |
-|-----------|----------|-------------------|
-| `client.notarial.envelopes` | `Envelope` | `from clicksign import Envelope` |
-| `client.notarial.documents` | `Document` | `from clicksign import Document` |
-| `client.notarial.signers` | `Signer` | `from clicksign import Signer` |
-| `client.notarial.requirements` | `Requirement` | `from clicksign import Requirement` |
-| `client.notarial.bulk_requirements` | `BulkRequirement` | `from clicksign import BulkRequirement` |
-| `client.notarial.signature_watchers` | `SignatureWatcher` | `from clicksign.resources.notarial.signature_watcher import SignatureWatcher` |
-| — | `Event` (aninhado) | `Envelope.list_events(id)`, `Document.list_events(doc_id, envelope_id=…)`, `Event.create_for_document` |
-| `client.webhooks` | `Webhook` | `from clicksign.resources.webhook import Webhook` |
-| `client.users` | `User` | `from clicksign.resources.user import User` |
-| `client.templates` / `template_fields` | `Template`, `TemplateField` | `from clicksign.resources.template import Template` |
-| `client.memberships` / `groups` | `Membership`, `Group` | imports em `clicksign.resources.*` |
-| `client.folders` | `Folder` | `from clicksign.resources.folder import Folder` |
-| `client.access_control_lists` | `AccessControlList` | `from clicksign.resources.access_control_list import AccessControlList` |
-| `client.envelope_bulk_creations` | `EnvelopeBulkCreation` | import direto do módulo |
-| `client.acceptance_term.whatsapps` | `Whatsapp` | `from clicksign.resources.acceptance_term.whatsapp import Whatsapp` |
-| `client.auto_signature.terms` | `Term` | `from clicksign.resources.auto_signature.term import Term` |
-
-Endpoints sem resource dedicado: `client.raw_request()` + `client.deserialize()`.
+Cliente Python para a [Clicksign API v3](https://developers.clicksign.com/) (JSON:API). Requer Python >= 3.10, sem dependências de runtime (apenas stdlib). Documentação detalhada em [`docs/`](docs/).
 
 ---
 
-## Requisitos
+## Índice
 
-- Python >= 3.10
-- Sem dependências de runtime (apenas stdlib)
-
-Extras opcionais: `pip install clicksign[httpx]` para connection pooling e menor latência sob carga; `pip install clicksign[async]` para asyncio.
+- [Instalação](#instalação)
+- [Configuração](#configuração)
+- [Multi-conta](#multi-conta)
+- [Timeouts, retry e instrumentação](#timeouts-retry-e-instrumentação)
+- [Início rápido](#início-rápido)
+- [Fluxo de assinatura (notarial)](#fluxo-de-assinatura-notarial)
+- [Filtros, ordenação e paginação](#filtros-ordenação-e-paginação)
+- [Outros recursos](#outros-recursos)
+- [Tratamento de erros](#tratamento-de-erros)
+- [Ambientes](#ambientes)
+- [Async (FastAPI, asyncio)](#async-fastapi-asyncio)
+- [HTTP transport e connection pool](#http-transport-e-connection-pool)
+- [Limitações e produção](#limitações-e-produção)
+- [Desenvolvimento](#desenvolvimento)
 
 ---
 
-## Uso
+> **Fluxo completo:** [`docs/WORKFLOW.md`](docs/WORKFLOW.md) — envelope → documento → signatário → ativação passo a passo.
 
-O SDK suporta dois padrões principais. Ambos chamam a mesma API; escolha com base em como sua aplicação gerencia credenciais e concorrência.
+> **Examples:** [`docs/examples/`](docs/examples/) — receitas prontas para retry, webhooks, multi-tenant, observabilidade e connection pool.
+
+> **Contrato do SDK:** [`docs/SDK_CONTRACT.md`](docs/SDK_CONTRACT.md) — timeouts, retry, JSON:API, erros e paginação.
+
+> **Observabilidade:** [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md) — hooks, log, correlation id, structlog, OpenTelemetry, PII.
+
+---
+
+## Instalação
+
+```bash
+pip install clicksign
+```
+
+Extras opcionais:
+
+```bash
+pip install clicksign[httpx]   # connection pooling (alto QPS)
+pip install clicksign[async]   # AsyncClicksignClient (requer httpx)
+```
+
+---
+
+## Configuração
+
+Dois padrões principais — escolha com base em como sua aplicação gerencia credenciais:
+
+| Padrão | Quando usar |
+|--------|-------------|
+| `configure()` + resources | Uma API key por processo; scripts; workers simples |
+| `ClicksignClient` | Múltiplas keys; dependências explícitas; código novo |
 
 ### Configuração global (single tenant)
-
-Configure uma vez na inicialização e importe as classes de resource diretamente. Ideal para scripts, workers com uma única API key por processo e protótipos rápidos.
 
 ```python
 import clicksign
@@ -70,103 +74,34 @@ clicksign.configure(
 )
 
 envelopes = Envelope.list()
-envelope = Envelope.create(name="Contract", locale="pt-BR")
-document = Document.create(envelope_id=envelope.id, filename="contract.pdf", content_base64="...")
+envelope = Envelope.create(name="Contrato", locale="pt-BR")
+document = Document.create(
+    envelope_id=envelope.id,
+    filename="contrato.pdf",
+    content_base64="...",
+)
 ```
-
-Os hooks de instrumentação também são globais:
-
-```python
-clicksign.on_request(lambda payload: print(payload["method"], payload["path"]))
-```
-
-Log HTTP integrado:
-
-```python
-import clicksign
-
-clicksign.log = "debug"  # or: clicksign.configure(..., log="info")
-# export CLICKSIGN_LOG=debug
-
-# Uses stdlib logger "clicksign"; Authorization is never logged.
-```
-
-Veja [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md) para hooks, níveis de logging, exemplos com structlog/OpenTelemetry/metrics e **como evitar PII** em handlers `on_error` customizados.
-
-**Correlação:** passe `X-Correlation-Id` por chamada via `RequestOptions(headers=correlation_id("your-id"))` para vincular requisições do SDK ao seu web request ou job id. A API pode ecoar a correlação no suporte; use `error.request_id` de `X-Request-Id` em falhas para tickets de suporte da Clicksign.
 
 ### Cliente explícito (`ClicksignClient`)
-
-Crie uma instância do cliente quando precisar de múltiplas API keys no mesmo processo, maior descobribilidade ou ausência de estado global.
 
 ```python
 from clicksign import ClicksignClient
 
 client = ClicksignClient(api_key="YOUR_API_KEY", environment="sandbox")
 
-# Namespaced resources
 envelopes = client.notarial.envelopes.list()
-envelope = client.notarial.envelopes.create(name="Contract", locale="pt-BR")
+envelope = client.notarial.envelopes.create(name="Contrato", locale="pt-BR")
 
-# Shorthand alias
+# Alias direto (shorthand)
 envelope = client.envelopes.retrieve(envelope.id)
-envelope.update(name="Updated contract")
-
-# Query chain (auto-pagination; per() max 50 — see docs/PAGINATION.md)
-drafts = client.envelopes.filter(status="draft").per(20).to_list()
-
-# Bulk operations (atomic requirements)
-client.notarial.bulk_requirements.create(
-    envelope.id,
-    block=lambda ops: ops.add_agree(
-        signer_id="...",
-        document_id="...",
-        role="sign",
-    ),
-)
+envelope.update(name="Contrato atualizado")
 ```
 
-Cada `ClicksignClient` possui seus próprios clientes HTTP e bulk. Passe um transport customizado se necessário:
+---
 
-```python
-from clicksign import ClicksignClient, UrllibHTTPClient
+## Multi-conta
 
-client = ClicksignClient(
-    api_key="YOUR_API_KEY",
-    environment="sandbox",
-    http_client=UrllibHTTPClient(proxy="http://proxy:8080"),
-)
-```
-
-### HTTP transport e connection pool
-
-**Padrão:** `UrllibHTTPClient` (apenas stdlib, **sem** connection pool — um handshake TCP/TLS por requisição). Adequado para scripts e baixo QPS.
-
-**Alta concorrência** (aplicações web, workers com muitas chamadas de API por segundo): instale httpx e injete um cliente compartilhado:
-
-```bash
-pip install clicksign[httpx]
-```
-
-```python
-from clicksign import ClicksignClient, HttpxHTTPClient
-
-# One HttpxHTTPClient per process (or per worker) reuses connections
-http = HttpxHTTPClient()
-client = ClicksignClient(api_key="YOUR_API_KEY", environment="production", http_client=http)
-
-# Global style
-import clicksign
-clicksign.configure(api_key="...", environment="production", http_client=http)
-```
-
-`AsyncClicksignClient` (`clicksign[async]`) também usa `httpx` com connection pool no event loop.
-
-Trade-offs e mitigações: [`docs/examples/08-production-limitations.md`](docs/examples/08-production-limitations.md) · receita singleton: [`docs/examples/12-http-connection-pool.md`](docs/examples/12-http-connection-pool.md).
-
-### Multi-tenant (thread-local)
-
-Para aplicações web ou filas de jobs onde cada requisição/job usa uma API key diferente, use `Services` para vincular um cliente à thread atual sem o `configure()` global:
+Para apps multi-tenant onde cada requisição/job usa uma API key diferente, use `Services` para vincular um cliente à thread atual:
 
 ```python
 from clicksign import Envelope, Services
@@ -174,14 +109,313 @@ from clicksign import Envelope, Services
 tenant = Services(api_key="TENANT_API_KEY", environment="sandbox")
 
 with tenant.use():
-    Envelope.list()  # routed through this tenant's client
+    Envelope.list()  # roteado pelo cliente deste tenant
 ```
 
-`Services.use()` define tanto o cliente HTTP quanto o cliente bulk para a thread. Prefira `ClicksignClient` diretamente ao rodar sob runtimes async/fiber onde o contexto thread-local pode não se propagar.
+`Services.use()` define cliente HTTP e bulk para a thread. Em runtime async/fiber, prefira `ClicksignClient` ou `AsyncClicksignClient` explícito — contexto thread-local pode não se propagar.
 
-### Async (FastAPI, asyncio)
+---
 
-Instale o extra opcional: `pip install clicksign[async]` (requer `httpx`). A API permanece inalterada; o cliente executa HTTP não-bloqueante no seu event loop.
+## Timeouts, retry e instrumentação
+
+### Timeouts por requisição
+
+```python
+from clicksign import ClicksignClient, RequestOptions
+
+client = ClicksignClient(api_key="YOUR_API_KEY", environment="sandbox")
+
+client.envelopes.create(
+    name="Contrato",
+    options=RequestOptions(
+        read_timeout=30.0,
+        open_timeout=5.0,
+    ),
+)
+```
+
+Timeouts separados: `open_timeout` (TCP connect), `write_timeout` (envio do corpo), `read_timeout` (resposta).
+
+### Retry
+
+Padrão **3 retries** com full-jitter exponential backoff. Desative por chamada:
+
+```python
+client.envelopes.retrieve("uuid", options={"max_retries": 0})
+```
+
+`BulkRequirement.create` retenta apenas `TimeoutError` — operações atômicas não são idempotentes.
+
+### Correlação de requisições
+
+```python
+from clicksign import RequestOptions, correlation_id
+
+client.envelopes.retrieve(
+    "uuid",
+    options=RequestOptions(headers=correlation_id("req-123")),
+)
+```
+
+Em falhas, use `error.request_id` (header `X-Request-Id`) para tickets de suporte da Clicksign.
+
+### Hooks de instrumentação
+
+```python
+import clicksign
+
+clicksign.on_request(lambda e: print(e["method"], e["path"], e["status"]))
+clicksign.on_retry(lambda e: print(e["attempt"], e["wait_ms"]))
+clicksign.on_error(lambda e: print(e["error"]))
+```
+
+Veja [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md) para exemplos com structlog, OpenTelemetry e Prometheus, e **como evitar PII** em handlers `on_error`.
+
+### Log HTTP integrado
+
+```bash
+export CLICKSIGN_LOG=debug   # ou info, warn, error
+```
+
+```python
+clicksign.configure(log="debug")
+# Usa stdlib logger "clicksign"; header Authorization nunca é logado.
+```
+
+---
+
+## Início rápido
+
+```python
+from clicksign import ClicksignClient
+
+client = ClicksignClient(api_key="YOUR_API_KEY", environment="sandbox")
+
+# Criar envelope
+envelope = client.notarial.envelopes.create(name="Contrato NDA", locale="pt-BR")
+
+# Adicionar documento
+doc = client.notarial.documents.create(
+    envelope_id=envelope.id,
+    filename="nda.pdf",
+    content_base64="...",
+)
+
+# Adicionar signatário
+signer = client.notarial.signers.create(
+    envelope_id=envelope.id,
+    name="Ana Souza",
+    email="ana@example.com",
+    has_documentation=True,
+)
+
+# Requisito de assinatura (atomic)
+client.notarial.bulk_requirements.create(
+    envelope.id,
+    block=lambda ops: ops.add_agree(
+        signer_id=signer.id,
+        document_id=doc.id,
+        role="sign",
+    ),
+)
+
+# Ativar envelope
+envelope.update(status="running")
+```
+
+---
+
+## Fluxo de assinatura (notarial)
+
+### 1. Envelope
+
+```python
+envelope = client.notarial.envelopes.create(name="Contrato", locale="pt-BR")
+envelope.update(deadline_at="2025-12-31T23:59:59Z")
+```
+
+### 2. Documento
+
+```python
+import base64
+
+doc = client.notarial.documents.create(
+    envelope_id=envelope.id,
+    filename="contrato.pdf",
+    content_base64=base64.b64encode(open("contrato.pdf", "rb").read()).decode(),
+)
+```
+
+### 3. Signatário
+
+```python
+signer = client.notarial.signers.create(
+    envelope_id=envelope.id,
+    name="João Silva",
+    email="joao@example.com",
+    has_documentation=True,
+    documentation="123.456.789-09",
+)
+```
+
+### 4. Requisitos de assinatura (bulk atômico)
+
+```python
+client.notarial.bulk_requirements.create(
+    envelope.id,
+    block=lambda ops: (
+        ops.add_agree(signer_id=signer.id, document_id=doc.id, role="sign"),
+        ops.add_provide_evidence(signer_id=signer.id, document_id=doc.id, auth="email"),
+    ),
+)
+```
+
+### 5. Ativar
+
+```python
+envelope.update(status="running")
+```
+
+### 6. Monitorar eventos
+
+```python
+events = client.notarial.envelopes.retrieve(envelope.id)
+# ou via webhook: docs/examples/03-webhooks.md
+```
+
+---
+
+## Filtros, ordenação e paginação
+
+```python
+# QueryProxy chain
+drafts = (
+    client.envelopes
+    .filter(status="draft")
+    .order("-created_at")
+    .per(20)
+    .with_includes("folder")
+    .to_list()
+)
+
+# Auto-paginação (itera todas as páginas)
+for envelope in client.envelopes.filter(status="running"):
+    print(envelope.id)
+
+# page() + per() explícitos
+page1 = client.envelopes.page(1).per(10).to_list()
+```
+
+`per()` máximo 50 — veja [`docs/PAGINATION.md`](docs/PAGINATION.md).
+
+### JSON:API sideload (`included`)
+
+```python
+envelopes = client.envelopes.with_includes("folder").to_list()
+print(envelopes[0].folder.name)  # sem chamada HTTP extra
+```
+
+---
+
+## Outros recursos
+
+| Namespace | Resource |
+|-----------|----------|
+| `client.notarial.envelopes` | `Envelope` |
+| `client.notarial.documents` | `Document` |
+| `client.notarial.signers` | `Signer` |
+| `client.notarial.requirements` | `Requirement` |
+| `client.notarial.bulk_requirements` | `BulkRequirement` |
+| `client.notarial.signature_watchers` | `SignatureWatcher` |
+| `client.webhooks` | `Webhook` |
+| `client.users` | `User` |
+| `client.templates` / `client.template_fields` | `Template`, `TemplateField` |
+| `client.memberships` / `client.groups` | `Membership`, `Group` |
+| `client.folders` | `Folder` |
+| `client.access_control_lists` | `AccessControlList` |
+| `client.envelope_bulk_creations` | `EnvelopeBulkCreation` |
+| `client.acceptance_term.whatsapps` | `Whatsapp` |
+| `client.auto_signature.terms` | `Term` |
+
+Endpoints sem resource dedicado:
+
+```python
+raw = client.raw_request("get", "/beta/feature")
+envelope = client.deserialize(raw, Envelope)
+print(envelope.last_response.status)
+```
+
+### User-Agent e identificação da aplicação
+
+```python
+clicksign.set_app_info("My CRM", "2.1.0", "https://example.com")
+# User-Agent: clicksign-python/x.y.z Python/3.10.x My_CRM/2.1.0
+```
+
+### Telemetria do provider (opt-in)
+
+```python
+clicksign.configure(enable_telemetry=True)
+```
+
+Envia métricas de latência anonimizadas (sem API keys nem corpos). Desativado por padrão.
+
+---
+
+## Tratamento de erros
+
+```python
+from clicksign.errors import (
+    AuthenticationError,
+    PermissionError,
+    NotFoundError,
+    ValidationError,
+    RateLimitError,
+    ServerError,
+    TimeoutError,
+)
+
+try:
+    client.envelopes.create(name="")
+except ValidationError as err:
+    print(err.message)          # primeiro detalhe (compatível)
+    print(err.error_code)       # código do primeiro erro
+    print(err.source_pointer)   # ex: /data/attributes/name
+    for api_error in err.api_errors:
+        print(api_error.pointer, api_error.detail)
+except RateLimitError as err:
+    print(err.rate_limit_reset)
+except ServerError as err:
+    if err.retryable:
+        ...
+```
+
+| Exceção | Status HTTP |
+|---------|-------------|
+| `AuthenticationError` | 401 |
+| `PermissionError` | 403 |
+| `NotFoundError` | 404 |
+| `ValidationError` | 400, 422 |
+| `RateLimitError` | 429 |
+| `ServerError` | 5xx |
+| `TimeoutError` | timeout de rede |
+
+---
+
+## Ambientes
+
+| Ambiente | Base URL |
+|----------|----------|
+| `sandbox` | `https://sandbox.clicksign.com/api/v3` |
+| `production` | `https://app.clicksign.com/api/v3` |
+
+```python
+client = ClicksignClient(api_key="...", environment="production")
+```
+
+---
+
+## Async (FastAPI, asyncio)
 
 ```python
 import asyncio
@@ -198,131 +432,37 @@ async def main():
 asyncio.run(main())
 ```
 
-Não use `Services.use()` dentro do asyncio — passe um `AsyncClicksignClient` explícito. Operações atômicas bulk permanecem no cliente sync `ClicksignClient.bulk` por enquanto.
+Não use `Services.use()` dentro do asyncio — passe `AsyncClicksignClient` explícito por coroutine.
 
-Sobrescritas por requisição (api key, headers, timeouts, `max_retries`) sem trocar de cliente. O número padrão de retries é **3** (`max_retries=0` desativa retries em uma única chamada):
+---
 
-```python
-from clicksign import ClicksignClient, RequestOptions, correlation_id
+## HTTP transport e connection pool
 
-client = ClicksignClient(api_key="DEFAULT_KEY", environment="sandbox")
+**Padrão:** `UrllibHTTPClient` (stdlib, sem connection pool — um handshake TCP/TLS por requisição). Adequado para scripts e baixo QPS.
 
-client.notarial.envelopes.retrieve(
-    "uuid",
-    options={"api_key": "TENANT_KEY"},
-)
-
-client.envelopes.create(
-    name="Contract",
-    options=RequestOptions(
-        headers=correlation_id("req-123"),  # or {"X-Correlation-Id": "req-123"}
-        read_timeout=30.0,
-    ),
-)
-
-client.envelopes.filter(status="draft").to_list(options={"api_key": "TENANT_KEY"})
-
-# Critical path: no retries even if the client default is 3
-client.envelopes.retrieve("uuid", options={"max_retries": 0})
-```
-
-Precedência: **options na chamada** sobrescrevem os padrões do cliente (thread-local e configuração global não são alterados).
-
-### Endpoints não mapeados ou beta
-
-Use `raw_request` para caminhos ainda não cobertos pelas classes de resource e, opcionalmente, desserialize:
+**Alto QPS:** instale `clicksign[httpx]` e injete um cliente compartilhado:
 
 ```python
-from clicksign import ClicksignClient, Envelope
+from clicksign import ClicksignClient, HttpxHTTPClient
 
-client = ClicksignClient(api_key="YOUR_API_KEY", environment="sandbox")
-
-raw = client.raw_request("get", "/beta/feature")
-print(raw.status, raw.request_id, raw.body)
-
-envelope = client.deserialize(raw, Envelope)
-print(envelope.last_response.status)
+http = HttpxHTTPClient()  # um por processo / worker
+client = ClicksignClient(api_key="...", environment="production", http_client=http)
 ```
 
-Após qualquer chamada bem-sucedida, inspecione os metadados HTTP via `client.last_response`, `client.bulk_last_response` ou `resource.last_response` (`status`, `request_id`, headers de rate limit).
+`AsyncClicksignClient` usa httpx com connection pool no event loop.
 
-### Erros de validação estruturados
+Receita singleton: [`docs/examples/12-http-connection-pool.md`](docs/examples/12-http-connection-pool.md).
 
-Em respostas 400/422, as exceções expõem o array `errors` completo do JSON:API:
+---
 
-```python
-from clicksign.errors import ValidationError
+## Limitações e produção
 
-try:
-    client.envelopes.create(name="")
-except ValidationError as err:
-    print(err.message)          # first error detail (backward compatible)
-    print(err.error_code)       # first error code
-    print(err.source_pointer)   # e.g. /data/attributes/name
-    for api_error in err.api_errors:
-        print(api_error.pointer, api_error.detail)
-```
+- `UrllibHTTPClient` não reutiliza conexões — use `HttpxHTTPClient` sob carga.
+- `Services.use()` usa `threading.local()` — incompatível com asyncio/trio.
+- Operações bulk atômicas retentam apenas `TimeoutError` (não são idempotentes).
+- Includes aninhados dependem do que a API retorna; tipos desconhecidos fazem fallback para `Resource` base.
 
-Mapeie erros de campo em formulários usando `source.pointer` ou `source.parameter` de cada entrada em `err.errors` / `err.api_errors`.
-
-### JSON:API sideload (`included`)
-
-Solicite recursos relacionados em uma única chamada com `with_includes()` e acesse-os como atributos:
-
-```python
-envelopes = client.envelopes.with_includes("folder").to_list()
-print(envelopes[0].folder.name)  # sideloaded Folder, no extra HTTP call
-print(envelopes[0].included_resources)  # all entries from `included`
-```
-
-**Limitações:** apenas relacionamentos presentes em `included` são resolvidos (caso contrário `envelope.folder` é `None`); includes aninhados dependem do que a API retorna; tipos desconhecidos fazem fallback para `Resource` base.
-
-### User-Agent e identificação da aplicação
-
-Toda requisição inclui um header `User-Agent` identificando o SDK e o runtime Python. Aplicações host podem adicionar seu próprio identificador:
-
-```python
-import clicksign
-
-clicksign.set_app_info("My CRM", "2.1.0", "https://example.com")
-# User-Agent: clicksign-python/x.y.z Python/3.10.x My_CRM/2.1.0
-```
-
-Sobrescrita por cliente:
-
-```python
-from clicksign import AppInfo, ClicksignClient
-
-client = ClicksignClient(api_key="...", app_info=AppInfo(name="Tenant", version="1.0"))
-```
-
-### Telemetria do provider (opt-in)
-
-O SDK pode enviar métricas de latência anonimizadas para a Clicksign (sem API keys, sem corpos de requisição/resposta). Desativado por padrão até você fazer opt-in:
-
-```python
-clicksign.configure(enable_telemetry=True)
-
-# opt-out
-clicksign.configure(enable_telemetry=False)
-# or
-clicksign.set_enable_telemetry(False)
-```
-
-Endpoint customizado (staging): `configure(enable_telemetry=True, telemetry_url="https://sandbox.clicksign.com/sdk/telemetry/v1/events")`.
-
-As métricas incluem versão do SDK, versão do Python, método HTTP, caminho normalizado (UUIDs mascarados), status e duração.
-
-### Qual padrão usar?
-
-| Padrão | Quando |
-|---------|------|
-| `configure()` + resources | Uma API key por processo; scripts; estilo legado |
-| `ClicksignClient` | Múltiplas keys; dependências explícitas; código novo |
-| `Services.use()` | Apps multi-tenant estilo Rails/Django/Celery (uma thread por requisição/job) |
-| `HttpxHTTPClient` (compartilhado) | Alto QPS por worker; veja [connection pool](docs/examples/12-http-connection-pool.md) |
-
-Veja [`docs/WORKFLOW.md`](docs/WORKFLOW.md) para um fluxo completo de assinatura e [`docs/examples/`](docs/examples/) para receitas específicas por cenário.
+Veja [`docs/examples/08-production-limitations.md`](docs/examples/08-production-limitations.md).
 
 ---
 
@@ -331,6 +471,14 @@ Veja [`docs/WORKFLOW.md`](docs/WORKFLOW.md) para um fluxo completo de assinatura
 ```bash
 pip install -e ".[dev]"
 pytest
+pytest --cov=clicksign --cov-report=term-missing
+ruff format .
 ruff check .
 mypy src/
 ```
+
+---
+
+## Licença
+
+MIT — veja [LICENSE](LICENSE).
