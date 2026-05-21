@@ -82,20 +82,21 @@ class Signer(Resource):
     def update(self, **attrs: object) -> Signer:  # type: ignore[override]
         raise NotImplementedError("Signer does not support update")
 
-    def notify(self, message: str, subject: str | None = None) -> None:
+    @classmethod
+    def notify(
+        cls,
+        envelope_id: str,
+        signer_id: str,
+        message: str,
+        subject: str | None = None,
+    ) -> None:
         from ...json_api.serializer import serialize_create
 
-        client = self._get_client()
+        client = cls._get_client()
         attrs: dict[str, str | None] = {"message": message}
         if subject is not None:
             attrs["subject"] = subject
-        parent_id = getattr(self, "_parent_id", None)
-        if parent_id:
-            client.post(
-                f"/envelopes/{parent_id}/signers/{self.id}/notifications",
-                serialize_create("notifications", attrs),
-            )
-        else:
-            client.post(
-                f"/signers/{self.id}/notifications", serialize_create("notifications", attrs)
-            )
+        client.post(
+            f"/envelopes/{envelope_id}/signers/{signer_id}/notifications",
+            serialize_create("notifications", attrs),
+        )
