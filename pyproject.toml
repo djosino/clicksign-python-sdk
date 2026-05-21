@@ -6,6 +6,7 @@ build-backend = "hatchling.build"
 name = "clicksign"
 dynamic = ["version"]
 description = "Official Python SDK for the Clicksign e-signature API (v3)"
+license = "MIT"
 requires-python = ">=3.10"
 dependencies = []
 

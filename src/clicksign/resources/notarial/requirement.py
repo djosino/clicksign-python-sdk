@@ -54,14 +54,21 @@ class Requirement(Resource):
     def create(  # type: ignore[override]
         cls,
         envelope_id: str,
+        signer_id: str | None = None,
+        document_id: str | None = None,
         relationships: dict[str, Any] | None = None,
         **attrs: Unpack[RequirementCreateParams],
     ) -> Requirement:
         from ...json_api.serializer import serialize_create
 
+        rels: dict[str, Any] = dict(relationships or {})
+        if signer_id:
+            rels["signer"] = {"data": {"type": "signers", "id": signer_id}}
+        if document_id:
+            rels["document"] = {"data": {"type": "documents", "id": document_id}}
         client = cls._get_client()
         path = f"/envelopes/{envelope_id}/requirements"
-        body = serialize_create(cls._get_resource_type(), dict(attrs), relationships or None)
+        body = serialize_create(cls._get_resource_type(), dict(attrs), rels or None)
         response = client.post(path, body)
         instances, _ = cls._parse_response(response)
         inst = instances[0]

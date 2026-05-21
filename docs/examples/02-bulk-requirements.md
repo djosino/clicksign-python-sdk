@@ -8,14 +8,10 @@ Cria ou remove vários requisitos de assinatura em **uma** requisição (`POST /
 
 ```python
 import os
-
-from clicksign import ClicksignClient
+import clicksign
 from clicksign.resources.notarial.bulk_requirement import BulkRequirement
 
-client = ClicksignClient(
-    api_key=os.environ["CLICKSIGN_API_KEY"],
-    environment="sandbox",
-)
+clicksign.configure(api_key=os.environ["CLICKSIGN_API_KEY"], environment="sandbox")
 
 # envelope, document e signer já criados (status draft)
 response = BulkRequirement.create(
@@ -32,19 +28,6 @@ response = BulkRequirement.create(
             document_id=document.id,
             pages="all",
         ),
-    ),
-)
-```
-
-Via facade (mesmo contrato):
-
-```python
-response = client.notarial.bulk_requirements.create(
-    envelope.id,
-    block=lambda ops: ops.add_agree(
-        signer_id=signer.id,
-        document_id=document.id,
-        role="sign",
     ),
 )
 ```

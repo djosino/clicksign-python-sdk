@@ -8,23 +8,8 @@ Guia do ciclo de vida de um envelope na API 3.0 (Envelope): criação, documento
 
 ## Configuração inicial
 
-Recomendado para código novo: `ClicksignClient` (dependências explícitas). Alternativa legada: `configure()` + classes de resource.
-
 ```python
 import os
-
-from clicksign import ClicksignClient
-
-client = ClicksignClient(
-    api_key=os.environ["CLICKSIGN_API_KEY"],
-    environment="sandbox",  # ou "production"
-    # base_url="https://..."  # opcional: sobrescreve environment
-)
-```
-
-Equivalente global:
-
-```python
 import clicksign
 from clicksign.resources.notarial.envelope import Envelope
 from clicksign.resources.notarial.document import Document
@@ -41,13 +26,11 @@ clicksign.configure(api_key=os.environ["CLICKSIGN_API_KEY"], environment="sandbo
 O envelope é o contêiner do processo. Começa em `draft`.
 
 ```python
-envelope = client.notarial.envelopes.create(
+envelope = Envelope.create(
     name="Contrato de prestação de serviços",
     locale="pt-BR",
     auto_close=True,
     remind_interval=3,
-    default_subject="Documentos aguardando sua assinatura",
-    default_message="Por favor, revise e assine os documentos em anexo.",
 )
 
 print(envelope.id)      # uuid do envelope
@@ -69,7 +52,7 @@ import base64
 pdf_bytes = open("contrato.pdf", "rb").read()
 pdf_base64 = "data:application/pdf;base64," + base64.b64encode(pdf_bytes).decode()
 
-document = client.notarial.documents.create(
+document = Document.create(
     envelope.id,
     filename="contrato.pdf",
     content_base64=pdf_base64,
@@ -77,18 +60,6 @@ document = client.notarial.documents.create(
 
 print(document.id)
 print(document.status)  # draft
-```
-
-Via classe (mesmo contrato):
-
-```python
-from clicksign.resources.notarial.document import Document
-
-document = Document.create(
-    envelope.id,
-    filename="contrato.pdf",
-    content_base64=pdf_base64,
-)
 ```
 
 **Outros modos de criação** (mutuamente exclusivos na API — consulte [`SPEC.md`](SPEC.md)):
@@ -106,7 +77,7 @@ Document.create(envelope.id, filename="contrato.docx", template_key="uuid-do-tem
 ## 3. Adicionar o signatário
 
 ```python
-signer = client.notarial.signers.create(
+signer = Signer.create(
     envelope.id,
     name="Maria Silva",
     email="maria.silva@example.com",
@@ -126,23 +97,13 @@ print(signer.envelope_id)
 
 Os requisitos definem **o que** o signatário deve fazer em cada documento.
 
-Relacionamentos padrão documento + signatário:
-
-```python
-rels = {
-    "document": {"data": {"type": "documents", "id": document.id}},
-    "signer": {"data": {"type": "signers", "id": signer.id}},
-}
-```
-
 ### 4.1 Concordância (`agree`)
 
 ```python
-from clicksign.resources.notarial.requirement import Requirement
-
 agree = Requirement.create(
     envelope.id,
-    relationships=rels,
+    signer_id=signer.id,
+    document_id=document.id,
     action="agree",
     role="sign",
 )
@@ -155,7 +116,8 @@ print(agree.id, agree.action)
 ```python
 evidence = Requirement.create(
     envelope.id,
-    relationships=rels,
+    signer_id=signer.id,
+    document_id=document.id,
     action="provide_evidence",
     auth="email",
 )
@@ -179,8 +141,6 @@ print(envelope.status)  # running
 Alternativa explícita (POST `/activate`):
 
 ```python
-from clicksign.resources.notarial.envelope import Envelope
-
 envelope = Envelope.activate(envelope.id)
 ```
 
@@ -215,51 +175,29 @@ signer.notify(
 ```python
 import base64
 import os
-
-from clicksign import ClicksignClient
+import clicksign
+from clicksign.resources.notarial.envelope import Envelope
+from clicksign.resources.notarial.document import Document
+from clicksign.resources.notarial.signer import Signer
 from clicksign.resources.notarial.requirement import Requirement
 
-client = ClicksignClient(
-    api_key=os.environ["CLICKSIGN_API_KEY"],
-    environment="sandbox",
-)
+clicksign.configure(api_key=os.environ["CLICKSIGN_API_KEY"], environment="sandbox")
 
 # 1. Envelope
-envelope = client.notarial.envelopes.create(
-    name="Contrato ACME",
-    locale="pt-BR",
-    auto_close=True,
-)
+envelope = Envelope.create(name="Contrato ACME", locale="pt-BR", auto_close=True)
 
 # 2. Documento
 pdf_b64 = "data:application/pdf;base64," + base64.b64encode(
     open("contrato.pdf", "rb").read()
 ).decode()
-document = client.notarial.documents.create(
-    envelope.id,
-    filename="contrato.pdf",
-    content_base64=pdf_b64,
-)
+document = Document.create(envelope.id, filename="contrato.pdf", content_base64=pdf_b64)
 
 # 3. Signatário
-signer = client.notarial.signers.create(
-    envelope.id,
-    name="Maria Silva",
-    email="maria@example.com",
-)
+signer = Signer.create(envelope.id, name="Maria Silva", email="maria@example.com")
 
 # 4. Requisitos
-rels = {
-    "document": {"data": {"type": "documents", "id": document.id}},
-    "signer": {"data": {"type": "signers", "id": signer.id}},
-}
-Requirement.create(envelope.id, relationships=rels, action="agree", role="sign")
-Requirement.create(
-    envelope.id,
-    relationships=rels,
-    action="provide_evidence",
-    auth="email",
-)
+Requirement.create(envelope.id, signer_id=signer.id, document_id=document.id, action="agree", role="sign")
+Requirement.create(envelope.id, signer_id=signer.id, document_id=document.id, action="provide_evidence", auth="email")
 
 # 5. Ativar
 envelope.update(status="running")
@@ -277,15 +215,13 @@ print(f"Envelope {envelope.id} ativo e signatário notificado.")
 Uma única requisição HTTP para vários requisitos (`BulkRequirement`):
 
 ```python
-response = client.notarial.bulk_requirements.create(
+from clicksign.resources.notarial.bulk_requirement import BulkRequirement
+
+response = BulkRequirement.create(
     envelope.id,
     block=lambda ops: (
         ops.add_agree(signer_id=signer.id, document_id=document.id, role="sign"),
-        ops.add_provide_evidence(
-            signer_id=signer.id,
-            document_id=document.id,
-            auth="email",
-        ),
+        ops.add_provide_evidence(signer_id=signer.id, document_id=document.id, auth="email"),
     ),
 )
 
@@ -305,9 +241,6 @@ Detalhes: [examples/02-bulk-requirements.md](examples/02-bulk-requirements.md). 
 ### Eventos e estado (API)
 
 ```python
-from clicksign.resources.notarial.document import Document
-from clicksign.resources.notarial.envelope import Envelope
-
 for event in Envelope.list_events(envelope.id):
     print(event.name, event.created)
 
@@ -317,7 +250,7 @@ for event in Document.list_events(document.id, envelope_id=envelope.id):
 for s in Envelope.list_signers(envelope.id):
     print(s.name, s.email)
 
-envelope = client.notarial.envelopes.retrieve(envelope.id)
+envelope = Envelope.retrieve(envelope.id)
 print(envelope.status)  # running, closed, cancelled, ...
 ```
 
