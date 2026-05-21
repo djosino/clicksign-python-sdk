@@ -15,3 +15,4 @@ htmlcov/
 .claude/exec.log
 docs/SDK_CLIENT_GAPS.md
 .claude/
+.idea/
