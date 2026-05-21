@@ -1,0 +1,288 @@
+{
+  "version": 1,
+  "resources": {
+    "Envelope": {
+      "attributes": {
+        "name": "str",
+        "status": "str",
+        "locale": "str",
+        "created_at": "str",
+        "updated_at": "str",
+        "deadline_at": "str",
+        "auto_close": "bool",
+        "remind_interval": "int",
+        "block_after_refusal": "bool"
+      },
+      "create": {
+        "name": "str",
+        "locale": "str",
+        "auto_close": "bool",
+        "remind_interval": "int",
+        "block_after_refusal": "bool",
+        "deadline_at": "str"
+      },
+      "update": {
+        "name": "str",
+        "status": "str",
+        "locale": "str",
+        "auto_close": "bool",
+        "remind_interval": "int",
+        "block_after_refusal": "bool",
+        "deadline_at": "str"
+      },
+      "filter": {
+        "status": "str",
+        "name": "str"
+      }
+    },
+    "Document": {
+      "attributes": {
+        "filename": "str",
+        "status": "str",
+        "content_base64": "str",
+        "template_key": "str",
+        "created_at": "str",
+        "updated_at": "str"
+      },
+      "create": {
+        "filename": "str",
+        "content_base64": "str",
+        "template_key": "str",
+        "metadata": "dict"
+      },
+      "update": {
+        "filename": "str",
+        "status": "str"
+      },
+      "filter": {
+        "status": "str",
+        "filename": "str"
+      }
+    },
+    "Signer": {
+      "attributes": {
+        "name": "str",
+        "email": "str",
+        "phone_number": "str",
+        "documentation": "str",
+        "birthday": "str",
+        "has_documentation": "bool",
+        "created_at": "str",
+        "updated_at": "str"
+      },
+      "create": {
+        "name": "str",
+        "email": "str",
+        "phone_number": "str",
+        "documentation": "str",
+        "birthday": "str",
+        "has_documentation": "bool"
+      },
+      "update": {},
+      "filter": {
+        "name": "str",
+        "email": "str"
+      }
+    },
+    "Requirement": {
+      "attributes": {
+        "action": "str",
+        "role": "str",
+        "rubricate": "bool",
+        "created_at": "str",
+        "updated_at": "str"
+      },
+      "create": {
+        "action": "str",
+        "role": "str",
+        "rubricate": "bool"
+      },
+      "update": {
+        "action": "str",
+        "role": "str",
+        "rubricate": "bool"
+      },
+      "filter": {
+        "action": "str",
+        "role": "str"
+      }
+    },
+    "SignatureWatcher": {
+      "attributes": {
+        "email": "str",
+        "kind": "str",
+        "created_at": "str",
+        "updated_at": "str"
+      },
+      "create": {
+        "email": "str",
+        "kind": "str"
+      },
+      "update": {},
+      "filter": {
+        "kind": "str",
+        "email": "str"
+      }
+    },
+    "Webhook": {
+      "attributes": {
+        "endpoint": "str",
+        "status": "str",
+        "events": "list_str",
+        "secret": "str",
+        "created_at": "str",
+        "updated_at": "str"
+      },
+      "create": {
+        "endpoint": "str",
+        "events": "list_str",
+        "status": "str"
+      },
+      "update": {
+        "endpoint": "str",
+        "events": "list_str",
+        "status": "str"
+      },
+      "filter": {
+        "status": "str",
+        "endpoint": "str"
+      }
+    },
+    "Folder": {
+      "attributes": {
+        "name": "str",
+        "path": "str",
+        "in_root": "bool",
+        "created_at": "str",
+        "updated_at": "str"
+      },
+      "create": {
+        "name": "str"
+      },
+      "update": {},
+      "filter": {
+        "in_root": "bool",
+        "name": "str"
+      }
+    },
+    "User": {
+      "attributes": {
+        "name": "str",
+        "email": "str",
+        "phone_number": "str",
+        "created": "str",
+        "modified": "str"
+      },
+      "create": {
+        "name": "str",
+        "email": "str",
+        "phone_number": "str"
+      },
+      "update": {},
+      "filter": {
+        "email": "str"
+      }
+    },
+    "Template": {
+      "attributes": {
+        "name": "str",
+        "color": "str",
+        "content_base64": "str",
+        "created": "str",
+        "modified": "str"
+      },
+      "create": {
+        "name": "str",
+        "color": "str",
+        "content_base64": "str"
+      },
+      "update": {
+        "name": "str",
+        "color": "str",
+        "content_base64": "str"
+      },
+      "filter": {
+        "name": "str"
+      }
+    },
+    "TemplateField": {
+      "attributes": {
+        "name": "str",
+        "kind": "str",
+        "created": "str",
+        "modified": "str"
+      },
+      "create": {},
+      "update": {},
+      "filter": {
+        "name": "str",
+        "kind": "str"
+      }
+    },
+    "Membership": {
+      "attributes": {
+        "role": "str",
+        "consumption_accessible": "bool",
+        "tracking_accessible": "bool",
+        "folder_management_accessible": "bool",
+        "created": "str",
+        "modified": "str"
+      },
+      "create": {
+        "role": "str",
+        "consumption_accessible": "bool",
+        "tracking_accessible": "bool",
+        "folder_management_accessible": "bool"
+      },
+      "update": {
+        "role": "str",
+        "consumption_accessible": "bool",
+        "tracking_accessible": "bool",
+        "folder_management_accessible": "bool"
+      },
+      "filter": {
+        "role": "str"
+      }
+    },
+    "Group": {
+      "attributes": {
+        "name": "str",
+        "created": "str",
+        "modified": "str"
+      },
+      "create": {
+        "name": "str"
+      },
+      "update": {
+        "name": "str"
+      },
+      "filter": {
+        "name": "str"
+      }
+    },
+    "AccountEvent": {
+      "attributes": {
+        "name": "str",
+        "data": "dict",
+        "created": "str"
+      },
+      "create": {},
+      "update": {},
+      "filter": {
+        "name": "str"
+      }
+    },
+    "NotarialEvent": {
+      "attributes": {
+        "name": "str",
+        "data": "dict",
+        "created": "str"
+      },
+      "create": {},
+      "update": {},
+      "filter": {
+        "name": "str"
+      }
+    }
+  }
+}
