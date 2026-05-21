@@ -9,7 +9,7 @@ e `docs/SDK_TEST_MATRIX.md`.
 ### Infraestrutura base
 
 **`pyproject.toml`**
-- `name = "clicksign"`
+- `name = "clicksign-python-sdk"` (import: `clicksign`)
 - `requires-python = ">=3.10"`
 - Sem dependências de runtime (stdlib apenas, ou `httpx` se adotado)
 - Dev: `pytest`, `pytest-cov`, `responses` (ou `pytest-httpx`), `ruff`, `mypy`

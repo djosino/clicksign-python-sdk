@@ -23,7 +23,7 @@ Ordem de grandeza típica em bursts (mesmo host, TLS já “quente” no OS): **
 ### Mitigação recomendada: `HttpxHTTPClient`
 
 ```bash
-pip install clicksign[httpx]
+pip install clicksign-python-sdk[httpx]
 ```
 
 ```python
@@ -86,7 +86,7 @@ Async: [`README` — Async](../../README.md#async-fastapi-asyncio) · multi-cont
 
 ## Checklist rápido
 
-- [ ] Alta carga HTTP → `pip install clicksign[httpx]` + `HttpxHTTPClient` compartilhado por worker
+- [ ] Alta carga HTTP → `pip install clicksign-python-sdk[httpx]` + `HttpxHTTPClient` compartilhado por worker
 - [ ] Multi-tenant sync → `Services.use()` por request/job
 - [ ] FastAPI/async → `AsyncClicksignClient`, não `Services.use()`
 - [ ] Observabilidade → `on_request` / `CLICKSIGN_LOG` para volume e lentidão

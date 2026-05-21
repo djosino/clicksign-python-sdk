@@ -2,7 +2,7 @@
 
 Receita para apps async: lifespan, dependência por request e fluxo notarial mínimo.
 
-**Requisito:** `pip install clicksign[async]` (httpx).
+**Requisito:** `pip install clicksign-python-sdk[async]` (httpx).
 
 ---
 
