@@ -47,7 +47,7 @@ class AsyncAcceptanceTermNamespace:
 class AsyncClicksignClient:
     """Async entry point for the Clicksign API.
 
-    Requires ``httpx`` (``pip install clicksign[async]``). The API itself is unchanged;
+    Requires ``httpx`` (``pip install clicksign-python-sdk[async]``). The API itself is unchanged;
     this client runs concurrent HTTP I/O on the event loop.
 
     ``Services.use()`` is thread-local and is **not** compatible with asyncio — pass an

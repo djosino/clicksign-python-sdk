@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 
 class AsyncClient(RequestInstrumentation):
-    """Async HTTP client for the Clicksign API (requires ``httpx``; see ``clicksign[async]``)."""
+    """Async HTTP client for the Clicksign API (requires ``httpx``; see ``clicksign-python-sdk[async]``)."""
 
     def __init__(
         self,
