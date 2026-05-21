@@ -8,7 +8,7 @@ Resources com **TypedDict** de params e **properties** explícitas nos atributos
 
 | Resource | Create / update / filter |
 |----------|-------------------------|
-| **Notarial** | `Envelope`, `Document`, `Signer`, `Requirement`, `SignatureWatcher`, `NotarialEvent` |
+| **Notarial** | `Envelope`, `Document`, `Signer`, `Requirement` (`auth` em create, ex. `"email"`), `SignatureWatcher`, `NotarialEvent` |
 | **Conta** | `Webhook`, `Folder`, `User`, `Template`, `TemplateField`, `Membership`, `Group` |
 
 Import:
@@ -75,7 +75,22 @@ pytest -q
 
 `pyproject.toml` usa `strict = true` nos módulos listados em `[tool.mypy] files`; resources tipados devem passar no mypy sem `# type: ignore` desnecessários.
 
-## Próximos passos (fora do §4)
+## Imports fora de `clicksign.__all__`
+
+Alguns resources existem no pacote mas **não** são reexportados na raiz (`import clicksign`). Use submódulo:
+
+```python
+from clicksign.resources.notarial.event import Event
+from clicksign.resources.user import User
+from clicksign.resources.template import Template
+from clicksign.resources.membership import Membership
+from clicksign.resources.group import Group
+from clicksign.resources.access_control_list import AccessControlList
+```
+
+Na raiz hoje: `Envelope`, `Document`, `Signer`, `Requirement`, `BulkRequirement`, `SignatureWatcher`, `Webhook`, `Folder` — ver `clicksign.__all__` em `src/clicksign/__init__.py`.
+
+## Próximos passos (tipagem)
 
 - Resources admin restantes (`AccessControlList`, `EnvelopeBulkCreation`, …) conforme [`SPEC.md`](SPEC.md)
 - `Required[...]` em create params quando a API publicar obrigatoriedade

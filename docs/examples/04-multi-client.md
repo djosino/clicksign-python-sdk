@@ -95,7 +95,7 @@ async def get_client(tenant_id: str) -> AsyncClicksignClient:
     return AsyncClicksignClient(api_key=tenant.api_key, environment=tenant.environment)
 ```
 
-Ver [08-production-limitations.md](08-production-limitations.md).
+Receita completa: [13-async-fastapi.md](13-async-fastapi.md) · limitações: [08-production-limitations.md](08-production-limitations.md).
 
 ---
 

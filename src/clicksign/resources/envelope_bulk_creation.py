@@ -18,11 +18,11 @@ class EnvelopeBulkCreation(Resource):
         raise NotImplementedError("EnvelopeBulkCreation does not support list")
 
     @classmethod
-    def retrieve(cls, resource_id: str) -> EnvelopeBulkCreation:
+    def retrieve(cls, resource_id: str, *, options: Any = None) -> EnvelopeBulkCreation:
         raise NotImplementedError("EnvelopeBulkCreation does not support retrieve")
 
     def update(self, **attrs: Any) -> EnvelopeBulkCreation:  # type: ignore[override]
         raise NotImplementedError("EnvelopeBulkCreation does not support update")
 
-    def delete(self) -> None:
+    def delete(self, *, options: Any = None) -> None:
         raise NotImplementedError("EnvelopeBulkCreation does not support delete")

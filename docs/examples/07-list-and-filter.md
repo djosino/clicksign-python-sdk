@@ -69,7 +69,20 @@ Com `ClicksignClient`: `client.envelopes.filter(...).to_list()`.
 
 ## Listagens aninhadas
 
-Métodos como `Envelope.list_documents(envelope_id)` são rotas aninhadas — não passam por `filter` da collection raiz. Ver [`SPEC.md`](../SPEC.md).
+Não use `Envelope.filter(...)` para listar signatários **dentro** de um envelope. Use métodos aninhados:
+
+```python
+# Equivalentes (mesma API)
+signers_a = Signer.list_for_envelope(envelope.id)
+signers_b = Envelope.list_signers(envelope.id)
+
+docs = Document.list_for_envelope(envelope.id)
+# ou Envelope.list_documents(envelope.id)
+
+reqs = Envelope.list_requirements(envelope.id, document_id=doc.id)
+```
+
+Tabela completa: [`../PAGINATION.md`](../PAGINATION.md) · rotas: [`../SPEC.md`](../SPEC.md).
 
 ---
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import builtins
 from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any
 
@@ -12,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class BoundQueryProxy:
-    def __init__(self, owner: ClicksignClient, proxy: QueryProxy) -> None:
+    def __init__(self, owner: ClicksignClient, proxy: QueryProxy[Any]) -> None:
         self._owner = owner
         self._proxy = proxy
 
@@ -36,7 +37,7 @@ class BoundQueryProxy:
         self._proxy.with_includes(*types)
         return self
 
-    def fields(self, **types: list[str]) -> BoundQueryProxy:
+    def fields(self, **types: builtins.list[str]) -> BoundQueryProxy:
         self._proxy.fields(**types)
         return self
 
@@ -45,7 +46,7 @@ class BoundQueryProxy:
         return self
 
     @property
-    def page_responses(self):
+    def page_responses(self) -> builtins.list[Any]:
         return self._proxy.page_responses
 
     def to_list(self, *, options: RequestOptions | dict[str, Any] | None = None) -> list[Resource]:
@@ -110,7 +111,7 @@ class BoundResource:
     def with_includes(self, *types: str) -> BoundQueryProxy:
         return BoundQueryProxy(self._owner, self._cls.with_includes(*types))
 
-    def fields(self, **types: list[str]) -> BoundQueryProxy:
+    def fields(self, **types: builtins.list[str]) -> BoundQueryProxy:
         return BoundQueryProxy(self._owner, self._cls.fields(**types))
 
     def __getattr__(self, name: str) -> Any:

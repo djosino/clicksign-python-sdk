@@ -124,9 +124,10 @@ class Envelope(Resource):
 
     @classmethod
     def list_requirements(cls, envelope_id: str, **filters: Any) -> list[Requirement]:
+        from ...json_api.query_builder import QueryBuilder
         from .requirement import Requirement
 
-        params = {f"filter[{k}]": str(v) for k, v in filters.items()} if filters else None
+        params = QueryBuilder().filter(**filters).to_params() if filters else None
         return cls.nested_list(envelope_id, "requirements", as_class=Requirement, params=params)  # type: ignore[return-value]
 
     @classmethod

@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 from clicksign.errors import NotFoundError, ValidationError
@@ -87,3 +89,54 @@ def test_relationship_accessors():
     assert r.envelope_id == ENV_ID
     assert r.document_id == DOC_ID
     assert r.signer_id == SIG_ID
+
+
+def test_create_with_signer_id_and_document_id():
+    captured: dict[str, Any] = {}
+    with mock_urlopen(make_response(201, {"data": req_data()}), capture=captured):
+        r = Requirement.create(
+            ENV_ID, signer_id=SIG_ID, document_id=DOC_ID, action="agree", role="sign"
+        )
+    assert r.id == UUID
+    assert r._parent_id == ENV_ID
+    rels = captured["body"]["data"]["relationships"]
+    assert rels["signer"]["data"]["id"] == SIG_ID
+    assert rels["document"]["data"]["id"] == DOC_ID
+
+
+def test_list_for_document():
+    payload = {"data": [req_data()], "links": {}}
+    captured: dict[str, Any] = {}
+    with mock_urlopen(make_response(200, payload), capture=captured):
+        results = Requirement.list_for_document(DOC_ID)
+    assert len(results) == 1
+    assert results[0].id == UUID
+    assert f"/documents/{DOC_ID}/relationships/requirements" in captured["url"]
+
+
+def test_list_for_signer():
+    payload = {"data": [req_data()], "links": {}}
+    captured: dict[str, Any] = {}
+    with mock_urlopen(make_response(200, payload), capture=captured):
+        results = Requirement.list_for_signer(SIG_ID)
+    assert len(results) == 1
+    assert results[0].id == UUID
+    assert f"/signers/{SIG_ID}/relationships/requirements" in captured["url"]
+
+
+def test_list_for_document_with_filters():
+    payload = {"data": [], "links": {}}
+    captured: dict[str, Any] = {}
+    with mock_urlopen(make_response(200, payload), capture=captured):
+        Requirement.list_for_document(DOC_ID, action="agree")
+    url = captured["url"]
+    assert "filter%5Baction%5D=agree" in url or "filter[action]=agree" in url
+
+
+def test_list_for_signer_with_filters():
+    payload = {"data": [], "links": {}}
+    captured: dict[str, Any] = {}
+    with mock_urlopen(make_response(200, payload), capture=captured):
+        Requirement.list_for_signer(SIG_ID, action="agree")
+    url = captured["url"]
+    assert "filter%5Baction%5D=agree" in url or "filter[action]=agree" in url

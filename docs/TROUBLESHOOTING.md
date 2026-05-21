@@ -106,6 +106,22 @@ Receita completa: [`examples/03-webhooks.md`](examples/03-webhooks.md).
 
 ---
 
+## Signer.notify — envelope_id e signer_id obrigatórios
+
+`Signer.notify` é um **classmethod**: sempre informe `envelope_id` e `signer_id` (não há rota na raiz `/signers/{id}/notifications`).
+
+```python
+Signer.notify(envelope.id, signer.id, message="Lembrete")
+
+# após retrieve — ainda precisa do envelope_id
+signer = Signer.retrieve(signer_id)  # rota raiz; envelope_id vem de envelope.id ou relationships
+Signer.notify(envelope.id, signer.id, message="Lembrete")
+```
+
+Na facade: `client.notarial.signers.notify(envelope_id, signer_id, message="...")`.
+
+---
+
 ## Document / Signer `create` na facade
 
 `Document.create` e `Signer.create` recebem o **id do envelope como primeiro argumento posicional**, não como `envelope_id=`:
@@ -118,6 +134,20 @@ Signer.create(envelope.id, name="...", email="...")
 # incorreto — envelope_id vira atributo do JSON por engano
 Document.create(envelope_id=envelope.id, filename="a.pdf")
 ```
+
+---
+
+## Paginação — `page(n)` não fixa a página em `to_list()`
+
+`Envelope.filter(...).page(3).per(25).to_list()` **não** retorna só a página 3: a auto-paginação começa em `page[number]=1` e segue até o fim.
+
+Para uma página específica:
+
+```python
+Envelope.filter(status="draft").page(3).per(25).first()   # uma requisição, página 3
+```
+
+Detalhes e listagens aninhadas: [`PAGINATION.md`](PAGINATION.md).
 
 ---
 

@@ -60,3 +60,13 @@ def test_create_422():
 def test_envelope_id_from_relationships():
     s = Signer(signer_data())
     assert s.envelope_id == ENV_ID
+
+
+def test_notify_requires_envelope_id_and_signer_id():
+    captured: dict[str, object] = {}
+    with mock_urlopen(make_response(204, None), capture=captured):
+        Signer.notify(ENV_ID, UUID, message="Reminder", subject="Sign")
+    assert captured["method"] == "POST"
+    assert captured["url"].endswith(f"/envelopes/{ENV_ID}/signers/{UUID}/notifications")
+    assert captured["body"]["data"]["attributes"]["message"] == "Reminder"
+    assert captured["body"]["data"]["attributes"]["subject"] == "Sign"

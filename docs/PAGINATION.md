@@ -17,6 +17,26 @@ Envelope.filter(status="draft").per(50).to_list()
 # .per(100) levanta ValueError
 ```
 
+## `page(n)` — página explícita vs auto-paginação
+
+| Terminal | `page[number]` na chain |
+|----------|-------------------------|
+| `.first()` | **Respeitado** — uma única requisição com os params da chain |
+| `.to_list()`, `for ... in proxy`, `.count()`, `.last()` | **Ignorado** na auto-paginação — o SDK começa em página **1** e avança até não haver `links.next` |
+
+```python
+# Uma página fixa (ex.: página 3, 25 itens) — use terminal que não auto-pagina tudo
+proxy = Envelope.filter(status="draft").page(3).per(25)
+first_item = proxy.first()           # GET com page[number]=3
+# proxy.to_list()                    # evite: percorre TODAS as páginas desde a 1
+
+# Todas as páginas da collection filtrada
+for envelope in Envelope.filter(status="draft").per(25):
+    ...
+```
+
+Async: mesmo contrato em `AsyncQueryProxy` (`await ...first()`, `async for ...`).
+
 ## Auto-paginação
 
 `filter(...).to_list()`, `for item in filter(...):`, `.count()` e `.last()` percorrem todas as páginas automaticamente.
@@ -53,9 +73,22 @@ Envelope.filter(status="draft").on_page(log_page).to_list()
 
 Útil para progresso, métricas ou integração com `instrumentation.on_request` sem duplicar lógica de paginação.
 
+## Listagens aninhadas (não são `filter` na raiz)
+
+Rotas como `GET /envelopes/:id/signers` **não** usam `QueryProxy` da collection raiz. O SDK expõe métodos de classe equivalentes:
+
+| Conteúdo | Método A | Método B (mesma rota HTTP) |
+|----------|----------|----------------------------|
+| Signatários do envelope | `Signer.list_for_envelope(envelope_id)` | `Envelope.list_signers(envelope_id)` |
+| Documentos do envelope | `Document.list_for_envelope(envelope_id)` | `Envelope.list_documents(envelope_id)` |
+| Requisitos do envelope | — | `Envelope.list_requirements(envelope_id, **filters)` |
+
+Filtros em `Envelope.list_requirements` usam `QueryBuilder` (`document_id=...`, etc.).  
+`Requirement.list_for_document` / `list_for_signer` listam via rotas de relacionamento (`/documents/:id/relationships/requirements`).
+
 ## Async
 
-`AsyncClicksignClient` expõe o mesmo comportamento em `AsyncQueryProxy` (`async for`, `on_page`, `page_responses`).
+`AsyncClicksignClient` expõe o mesmo comportamento em `AsyncQueryProxy` (`async for`, `on_page`, `page_responses`). Receita: [`examples/13-async-fastapi.md`](examples/13-async-fastapi.md).
 
 ## Referências
 

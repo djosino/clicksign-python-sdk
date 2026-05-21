@@ -95,7 +95,7 @@ class UrllibHTTPClient:
         body: bytes | None,
         timeout: float,
     ) -> HTTPResponse:
-        proxy_map = {"http": self._proxy, "https": self._proxy}
+        proxy_map: dict[str, str] = {k: self._proxy for k in ("http", "https") if self._proxy}
         handlers: list[Any] = [urllib.request.ProxyHandler(proxy_map)]
         if not self._verify_ssl_certs:
             handlers.append(urllib.request.HTTPSHandler(context=ssl._create_unverified_context()))
@@ -212,6 +212,7 @@ class HttpxHTTPClient:
         read_timeout: float,
         write_timeout: float,
     ) -> HTTPResponse:
+        timeout: Any
         if self._owns_client:
             import httpx
 
@@ -235,10 +236,11 @@ class HttpxHTTPClient:
         except Exception as exc:
             exc_name = type(exc).__name__
             if exc_name == "HTTPStatusError":
+                raw: Any = exc
                 raise HTTPStatusError(
-                    exc.response.status_code,
-                    exc.response.text,
-                    dict(exc.response.headers),
+                    raw.response.status_code,
+                    raw.response.text,
+                    dict(raw.response.headers),
                 ) from exc
             if exc_name == "RequestError":
                 raise HTTPConnectionError(str(exc)) from exc
@@ -325,6 +327,7 @@ class HttpxAsyncHTTPClient:
         read_timeout: float,
         write_timeout: float,
     ) -> HTTPResponse:
+        timeout: Any
         if self._owns_client:
             import httpx
 
@@ -348,10 +351,11 @@ class HttpxAsyncHTTPClient:
         except Exception as exc:
             exc_name = type(exc).__name__
             if exc_name == "HTTPStatusError":
+                raw: Any = exc
                 raise HTTPStatusError(
-                    exc.response.status_code,
-                    exc.response.text,
-                    dict(exc.response.headers),
+                    raw.response.status_code,
+                    raw.response.text,
+                    dict(raw.response.headers),
                 ) from exc
             if exc_name == "RequestError":
                 raise HTTPConnectionError(str(exc)) from exc

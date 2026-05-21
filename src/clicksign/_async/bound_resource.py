@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import builtins
 from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING, Any
 
@@ -16,7 +17,7 @@ if TYPE_CHECKING:
 
 
 class AsyncBoundQueryProxy:
-    def __init__(self, owner: AsyncClicksignClient, proxy: AsyncQueryProxy) -> None:
+    def __init__(self, owner: AsyncClicksignClient, proxy: AsyncQueryProxy[Any]) -> None:
         self._owner = owner
         self._proxy = proxy
 
@@ -40,7 +41,7 @@ class AsyncBoundQueryProxy:
         self._proxy.with_includes(*types)
         return self
 
-    def fields(self, **types: list[str]) -> AsyncBoundQueryProxy:
+    def fields(self, **types: builtins.list[str]) -> AsyncBoundQueryProxy:
         self._proxy.fields(**types)
         return self
 
@@ -49,11 +50,11 @@ class AsyncBoundQueryProxy:
         return self
 
     @property
-    def last_response(self):
+    def last_response(self) -> Any:
         return self._proxy.last_response
 
     @property
-    def page_responses(self):
+    def page_responses(self) -> builtins.list[Any]:
         return self._proxy.page_responses
 
     async def to_list(
@@ -143,7 +144,7 @@ class AsyncBoundResource:
             AsyncQueryProxy(self._cls, self._owner.http).with_includes(*types),
         )
 
-    def fields(self, **types: list[str]) -> AsyncBoundQueryProxy:
+    def fields(self, **types: builtins.list[str]) -> AsyncBoundQueryProxy:
         return AsyncBoundQueryProxy(
             self._owner,
             AsyncQueryProxy(self._cls, self._owner.http).fields(**types),

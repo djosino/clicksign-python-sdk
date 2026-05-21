@@ -39,8 +39,8 @@ def client_scope(
 
 
 def get_thread_client() -> Client | None:
-    return threading.current_thread().__dict__.get("_clicksign_client")  # type: ignore[return-value]
+    return threading.current_thread().__dict__.get("_clicksign_client")
 
 
 def get_thread_bulk_client() -> BulkOperationsClient | None:
-    return threading.current_thread().__dict__.get("_clicksign_bulk_client")  # type: ignore[return-value]
+    return threading.current_thread().__dict__.get("_clicksign_bulk_client")

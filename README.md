@@ -16,7 +16,7 @@ Cliente Python para a [Clicksign API v3](https://developers.clicksign.com/) (JSO
 - [Multi-conta](#multi-conta)
 - [Timeouts, retry e instrumentação](#timeouts-retry-e-instrumentação)
 - [Início rápido](#início-rápido)
-- [Fluxo de assinatura (notarial)](#fluxo-de-assinatura-notarial)
+- [Fluxo de assinatura (notarial)](#fluxo-de-assinatura-notarial) (criar → ativar → notificar → eventos)
 - [Filtros, ordenação e paginação](#filtros-ordenação-e-paginação)
 - [Outros recursos](#outros-recursos)
 - [Tratamento de erros](#tratamento-de-erros)
@@ -274,9 +274,24 @@ client.notarial.bulk_requirements.create(
 
 ```python
 envelope.update(status="running")
+# ou: Envelope.activate(envelope.id)  — POST /envelopes/:id/activate
 ```
 
-### 6. Monitorar eventos
+### 6. Notificar signatários
+
+```python
+from clicksign.resources.notarial.signer import Signer
+
+# Um signatário (envelope_id e signer_id obrigatórios)
+Signer.notify(envelope.id, signer.id, message="Seu contrato está disponível para assinatura.")
+
+# Todos os pendentes do envelope
+envelope.notify(message="Seu contrato está disponível para assinatura.")
+```
+
+Detalhes: [`docs/WORKFLOW.md`](docs/WORKFLOW.md) (seção 6).
+
+### 7. Monitorar eventos
 
 ```python
 from clicksign.resources.notarial.envelope import Envelope
@@ -428,6 +443,8 @@ client = ClicksignClient(api_key="...", environment="production")
 
 ## Async (FastAPI, asyncio)
 
+Requer `pip install clicksign[async]`. Receita completa: [`docs/examples/13-async-fastapi.md`](docs/examples/13-async-fastapi.md).
+
 ```python
 import asyncio
 from clicksign import AsyncClicksignClient
@@ -439,11 +456,13 @@ async def main():
             print(env.id)
         envelope = await client.envelopes.retrieve("uuid")
         await envelope.update_async(status="running")
+        # Ativar: await client.notarial.envelopes.activate(envelope.id)
 
 asyncio.run(main())
 ```
 
-Não use `Services.use()` dentro do asyncio — passe `AsyncClicksignClient` explícito por coroutine.
+- Não use `Services.use()` no asyncio — use `AsyncClicksignClient` explícito.
+- Paginação: `.page(n)` só vale com `.first()`; `.to_list()` auto-pagina desde a página 1 — [`docs/PAGINATION.md`](docs/PAGINATION.md).
 
 ---
 

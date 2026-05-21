@@ -171,6 +171,8 @@ fetch_auto_pages(params):
 **`links.next` tem prioridade.** A heurística de contagem é o fallback para APIs que omitem `links`.
 Quando `links.next` é null, NÃO faça outra requisição mesmo que `len(items) == per`.
 
+**Página explícita:** em `to_list()` / `for ... in proxy` / `count()` / `last()`, o `page[number]` da chain **não** é usado — a auto-paginação reinicia em `page = 1`. Para buscar uma página fixa, use `.first()` (uma requisição com os params da chain) ou não use auto-paginação.
+
 ### Query chain
 
 Builder encadeável que acumula parâmetros antes de executar:
