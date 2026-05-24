@@ -402,3 +402,10 @@ def test_auto_pagination_raises_on_api_error():
     ):
         with pytest.raises(ServerError):
             Envelope.filter().per(1).to_list()
+
+
+def test_update_without_id_raises_value_error():
+    e = Envelope({"type": "envelopes", "attributes": {}, "relationships": {}})
+    assert e.id is None
+    with pytest.raises(ValueError, match="without an id"):
+        e.update(name="X")

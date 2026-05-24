@@ -62,6 +62,14 @@ _bulk_client: Any = None
 
 
 def configure(**kwargs: Any) -> None:
+    """Configure the global Clicksign client.
+
+    Accepted kwargs mirror :class:`~clicksign.configuration.Configuration` attributes:
+    ``api_key``, ``base_url``, ``environment``, ``open_timeout``, ``read_timeout``,
+    ``write_timeout``, ``max_retries``, ``logger``, ``proxy``, ``verify_ssl_certs``,
+    ``http_client``, ``enable_telemetry``, ``telemetry_url``, ``log``.
+    Resets the cached global client so the next request picks up new settings.
+    """
     global _config, _client, _bulk_client
     log_value = kwargs.pop("log", None)
     for key, value in kwargs.items():
@@ -76,10 +84,15 @@ def configure(**kwargs: Any) -> None:
 
 
 def get_enable_telemetry() -> bool:
+    """Return whether provider telemetry is enabled for the global client."""
     return bool(_config.enable_telemetry)
 
 
 def set_enable_telemetry(enabled: bool) -> None:
+    """Enable or disable provider telemetry for the global client.
+
+    Resets the cached global client so the change takes effect on the next request.
+    """
     global _client, _bulk_client
     _config.enable_telemetry = enabled
     _client = None
@@ -134,17 +147,35 @@ def set_app_info(name: str, version: str, url: str | None = None) -> None:
 
 
 def on_request(callback: Callable[..., Any]) -> None:
+    """Register a callback fired after every HTTP request (success or error).
+
+    Callback receives a dict with keys: ``method``, ``path``, ``status``,
+    ``attempt``, ``duration_ms``. Exceptions in the callback are swallowed.
+    """
     instrumentation.on_request(callback)
 
 
 def on_retry(callback: Callable[..., Any]) -> None:
+    """Register a callback fired before each retry attempt.
+
+    Callback receives a dict with keys: ``method``, ``path``, ``attempt``,
+    ``max_retries``, ``error``, ``wait_ms``. Exceptions in the callback are swallowed.
+    """
     instrumentation.on_retry(callback)
 
 
 def on_error(callback: Callable[..., Any]) -> None:
+    """Register a callback fired when a request raises a :class:`ClicksignError`.
+
+    Callback receives a dict with keys: ``method``, ``path``, ``status``,
+    ``error``, ``duration_ms``. Exceptions in the callback are swallowed.
+    """
     instrumentation.on_error(callback)
 
 
+# Module-level __getattr__/__setattr__ expose `clicksign.log` as a writable
+# property without importing the internal _log_level at module load time.
+# This avoids a circular-import between __init__ and log.py during bootstrap.
 def __getattr__(name: str) -> Any:
     if name == "log":
         return get_log()

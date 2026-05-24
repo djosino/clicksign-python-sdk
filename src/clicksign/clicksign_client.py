@@ -55,6 +55,23 @@ class ClicksignClient:
     HTTP settings. Use :meth:`raw_request` and :meth:`deserialize` for unmapped endpoints.
     ``last_response`` reflects the most recent HTTP call on the main client; use
     :attr:`bulk_last_response` after bulk operations.
+
+    Args:
+        api_key: Clicksign API token (no ``Bearer`` prefix).
+        base_url: Full base URL override. Mutually exclusive with ``environment``.
+        environment: ``"production"`` (default) or ``"sandbox"``.
+        open_timeout: TCP connect timeout in seconds (default 2.0).
+        read_timeout: Response read timeout in seconds (default 10.0).
+        write_timeout: Request body send timeout in seconds (default 10.0).
+        max_retries: Max retry attempts for retryable errors (default 3).
+        logger: Optional stdlib logger instance for request/error logging.
+        instrumentation: Override the global :class:`Instrumentation` instance.
+        http_client: Injectable :class:`HTTPClient` (e.g. ``HttpxHTTPClient`` for pooling).
+        proxy: HTTP proxy URL. Ignored when ``http_client`` is provided.
+        verify_ssl_certs: Disable TLS verification (testing only). Ignored when
+            ``http_client`` is provided.
+        enable_telemetry: Opt-in to provider telemetry. Defaults to global config.
+        telemetry_url: Override telemetry endpoint. Defaults to derived from ``base_url``.
     """
 
     def __init__(

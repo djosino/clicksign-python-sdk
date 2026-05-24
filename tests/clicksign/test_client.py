@@ -434,3 +434,10 @@ def test_default_http_client_factory():
         default_http_client(proxy="http://proxy:8080", verify_ssl_certs=False),
         UrllibHTTPClient,
     )
+
+
+def test_unrelated_os_error_is_not_swallowed():
+    """PermissionError (OSError subclass unrelated to networking) must propagate, not become TimeoutError."""
+    fake = FakeHTTPClient(PermissionError("access denied"))
+    with pytest.raises(PermissionError):
+        make_client(http_client=fake).get("/envelopes")

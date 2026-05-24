@@ -263,8 +263,10 @@ class Resource:
     ) -> Resource:
         from .json_api.serializer import serialize_update
 
+        if not self.id:
+            raise ValueError("Cannot update a resource without an id")
         client = self._resolve_client()
-        body = serialize_update(self._get_resource_type(), self.id, attrs, relationships or None)  # type: ignore[arg-type]
+        body = serialize_update(self._get_resource_type(), self.id, attrs, relationships or None)
         response = client.patch(self._build_path(), body, options=options)
         instances, _ = self._parse_response(response)
         self._copy_response_state(instances[0])
@@ -304,8 +306,10 @@ class Resource:
     ) -> Resource:
         from .json_api.serializer import serialize_update
 
+        if not self.id:
+            raise ValueError("Cannot update a resource without an id")
         client = self._resolve_async_client()
-        body = serialize_update(self._get_resource_type(), self.id, attrs, relationships or None)  # type: ignore[arg-type]
+        body = serialize_update(self._get_resource_type(), self.id, attrs, relationships or None)
         response = await client.patch(self._build_path(), body, options=options)
         instances, _ = self._parse_response(response)
         self._copy_response_state(instances[0])
@@ -491,7 +495,10 @@ class QueryProxy(Generic[TResource]):
             self._class._attach_from_client(client, instances)
 
             if self._on_page is not None:
-                self._on_page(page, self._last_response, instances)  # type: ignore[arg-type]
+                try:
+                    self._on_page(page, self._last_response, instances)  # type: ignore[arg-type]
+                except Exception:
+                    pass
 
             yield from instances  # type: ignore[misc]
 

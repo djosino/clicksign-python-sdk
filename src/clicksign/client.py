@@ -26,6 +26,15 @@ if TYPE_CHECKING:
 
 
 class Client(RequestInstrumentation):
+    """Low-level HTTP client used by resources and :class:`ClicksignClient`.
+
+    All three timeouts are applied independently per request: ``open_timeout``
+    (TCP connect), ``write_timeout`` (body send), ``read_timeout`` (response).
+    Retries use full-jitter exponential backoff up to ``max_retries`` attempts.
+    Inject a custom ``http_client`` for connection pooling (``HttpxHTTPClient``)
+    or test doubles (``FakeHTTPClient``).
+    """
+
     def __init__(
         self,
         api_key: str,

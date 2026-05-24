@@ -176,7 +176,11 @@ def execute_http_request(
                 )
                 raise
 
-        except (HTTPConnectionError, TimeoutError, OSError) as exc:
+        except (HTTPConnectionError, TimeoutError, ConnectionError, OSError) as exc:
+            if isinstance(exc, OSError) and not isinstance(
+                exc, (ConnectionError, TimeoutError, HTTPConnectionError)
+            ):
+                raise
             duration_ms = (time.monotonic() - start) * 1000
             timeout_err = errors.TimeoutError(str(exc))
 

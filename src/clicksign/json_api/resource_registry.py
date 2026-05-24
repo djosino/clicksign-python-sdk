@@ -1,17 +1,23 @@
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..resource import Resource
 
 _REGISTRY: dict[str, type[Resource]] | None = None
+_log = logging.getLogger("clicksign")
 
 
 def get_resource_class(resource_type: str) -> type[Resource]:
     from ..resource import Resource
 
-    return _load_registry().get(resource_type, Resource)
+    cls = _load_registry().get(resource_type)
+    if cls is None:
+        _log.debug("Unknown JSON:API resource type %r — falling back to generic Resource", resource_type)
+        return Resource
+    return cls
 
 
 def _load_registry() -> dict[str, type[Resource]]:

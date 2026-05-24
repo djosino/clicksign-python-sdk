@@ -36,7 +36,11 @@ def get_log() -> str | None:
 
 
 def set_log(level: str | bool | None) -> None:
-    """Enable SDK logging at ``debug``, ``info``, ``warn``/``warning``, or ``error``."""
+    """Enable SDK logging at ``debug``, ``info``, ``warn``/``warning``, or ``error``.
+
+    Convenience: ``True`` → ``"info"``, ``False`` / ``None`` → disabled.
+    Also settable via environment variable ``CLICKSIGN_LOG=debug``.
+    """
     global _log_level
     if level is None or level is False:
         _log_level = None

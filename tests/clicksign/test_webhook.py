@@ -188,3 +188,52 @@ def test_legacy_flat_payload_still_verifies_signature():
 
     with pytest.raises(WebhookPayloadError, match="missing 'event' object"):
         construct_event(LEGACY_PAYLOAD, sig, SECRET)
+
+
+def test_construct_event_missing_occurred_at_does_not_raise():
+    """occurred_at is optional — missing value yields occurred_at=None."""
+    payload_dict = {
+        **SAMPLE_PAYLOAD,
+        "event": {k: v for k, v in SAMPLE_PAYLOAD["event"].items() if k != "occurred_at"},
+    }
+    payload = _payload_bytes(payload_dict)
+    sig = compute_signature(payload, SECRET)
+    event = construct_event(payload, sig, SECRET)
+    assert event.occurred_at is None
+
+
+def test_construct_event_malformed_occurred_at_does_not_raise():
+    """Unparseable occurred_at yields occurred_at=None rather than raising."""
+    payload_dict = {
+        **SAMPLE_PAYLOAD,
+        "event": {**SAMPLE_PAYLOAD["event"], "occurred_at": "not-a-date"},
+    }
+    payload = _payload_bytes(payload_dict)
+    sig = compute_signature(payload, SECRET)
+    event = construct_event(payload, sig, SECRET)
+    assert event.occurred_at is None
+
+
+def test_construct_event_occurred_at_utc_z_suffix():
+    """occurred_at with Z suffix is parsed as UTC."""
+    payload_dict = {
+        **SAMPLE_PAYLOAD,
+        "event": {**SAMPLE_PAYLOAD["event"], "occurred_at": "2024-01-15T12:00:00Z"},
+    }
+    payload = _payload_bytes(payload_dict)
+    sig = compute_signature(payload, SECRET)
+    event = construct_event(payload, sig, SECRET)
+    assert event.occurred_at is not None
+    assert event.occurred_at.tzinfo is not None
+
+
+def test_construct_event_tolerance_missing_occurred_at_skips_check():
+    """Tolerance check is skipped when occurred_at is absent — no error raised."""
+    payload_dict = {
+        **SAMPLE_PAYLOAD,
+        "event": {k: v for k, v in SAMPLE_PAYLOAD["event"].items() if k != "occurred_at"},
+    }
+    payload = _payload_bytes(payload_dict)
+    sig = compute_signature(payload, SECRET)
+    event = construct_event(payload, sig, SECRET, tolerance=300)
+    assert event.occurred_at is None

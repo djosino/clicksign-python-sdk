@@ -95,3 +95,64 @@ def test_query_proxy_on_page_callback():
         Envelope.filter().on_page(capture).to_list()
 
     assert pages == [(1, 1)]
+
+
+def test_query_proxy_stops_immediately_on_empty_response():
+    with mock_urlopen(
+        make_response(200, {"data": [], "links": {"next": None}})
+    ):
+        items = Envelope.filter().to_list()
+    assert items == []
+
+
+def test_query_proxy_stops_on_last_page_with_next_null():
+    """Full page followed by null links.next must not make an extra request."""
+    envelope = {"id": "1", "type": "envelopes", "attributes": {}, "relationships": {}}
+    with mock_urlopen(
+        make_response(200, {"data": [envelope], "links": {"next": None}})
+    ):
+        items = Envelope.filter().to_list()
+    assert len(items) == 1
+
+
+def test_query_proxy_multi_page_accumulates_all_items():
+    envelope_a = {"id": "1", "type": "envelopes", "attributes": {}, "relationships": {}}
+    envelope_b = {"id": "2", "type": "envelopes", "attributes": {}, "relationships": {}}
+    with mock_urlopen(
+        make_response(200, {"data": [envelope_a], "links": {"next": "http://next"}}),
+        make_response(200, {"data": [envelope_b], "links": {"next": None}}),
+    ):
+        items = Envelope.filter().to_list()
+    assert [e.id for e in items] == ["1", "2"]
+
+
+def test_query_proxy_on_page_callback_exception_is_swallowed():
+    """Exceptions in on_page callback must not abort pagination."""
+    envelope = {"id": "1", "type": "envelopes", "attributes": {}, "relationships": {}}
+
+    def bad_callback(page, meta, items):
+        raise RuntimeError("boom")
+
+    with mock_urlopen(
+        make_response(200, {"data": [envelope], "links": {"next": None}})
+    ):
+        items = Envelope.filter().on_page(bad_callback).to_list()
+
+    assert len(items) == 1
+
+
+def test_query_proxy_on_page_callback_receives_page_number_and_count():
+    pages: list[tuple[int, int]] = []
+    envelope_a = {"id": "1", "type": "envelopes", "attributes": {}, "relationships": {}}
+    envelope_b = {"id": "2", "type": "envelopes", "attributes": {}, "relationships": {}}
+
+    def capture(page: int, meta, items) -> None:
+        pages.append((page, len(items)))
+
+    with mock_urlopen(
+        make_response(200, {"data": [envelope_a], "links": {"next": "http://next"}}),
+        make_response(200, {"data": [envelope_b], "links": {"next": None}}),
+    ):
+        Envelope.filter().on_page(capture).to_list()
+
+    assert pages == [(1, 1), (2, 1)]

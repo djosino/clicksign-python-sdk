@@ -121,9 +121,25 @@ class ProviderTelemetry:
             return
 
     def flush(self, timeout: float = 1.0) -> None:
+        """Wait up to ``timeout`` seconds for pending telemetry events to be sent.
+
+        Best-effort: returns when the queue is empty or the deadline passes.
+        """
         if not self._enabled:
             return
-        self._queue.join()
+        if self._worker is None or not self._worker.is_alive():
+            return
+        # queue.Queue.join() blocks forever with no timeout option, so we run it
+        # in a daemon thread and join *that* thread with the deadline.
+        done = threading.Event()
+
+        def _wait() -> None:
+            self._queue.join()
+            done.set()
+
+        t = threading.Thread(target=_wait, daemon=True)
+        t.start()
+        done.wait(timeout=timeout)
 
     def close(self) -> None:
         if self._worker is None:

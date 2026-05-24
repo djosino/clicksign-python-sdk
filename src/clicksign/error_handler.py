@@ -4,6 +4,7 @@ from typing import Any
 
 from . import errors
 from .api_error import first_error_message, parse_api_errors
+from .response_metadata import _header_value
 
 
 def handle(status_code: int, body_text: str, headers: dict[str, Any]) -> None:
@@ -12,7 +13,7 @@ def handle(status_code: int, body_text: str, headers: dict[str, Any]) -> None:
 
     parsed_errors = parse_api_errors(body_text)
     message = first_error_message(parsed_errors, f"HTTP {status_code}")
-    request_id = headers.get("X-Request-Id") or headers.get("x-request-id")
+    request_id = _header_value(headers, "X-Request-Id")
 
     kwargs: dict[str, Any] = {
         "status_code": status_code,
@@ -30,10 +31,8 @@ def handle(status_code: int, body_text: str, headers: dict[str, Any]) -> None:
     elif status_code == 409:
         raise errors.ConflictError(message, **kwargs)
     elif status_code == 429:
-        rate_limit_remaining = headers.get("X-RateLimit-Remaining") or headers.get(
-            "x-ratelimit-remaining"
-        )
-        rate_limit_reset = headers.get("X-RateLimit-Reset") or headers.get("x-ratelimit-reset")
+        rate_limit_remaining = _header_value(headers, "X-RateLimit-Remaining")
+        rate_limit_reset = _header_value(headers, "X-RateLimit-Reset")
         raise errors.RateLimitError(
             message,
             rate_limit_remaining=rate_limit_remaining,

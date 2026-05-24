@@ -38,6 +38,11 @@ class Configuration:
 
     @environment.setter
     def environment(self, value: str) -> None:
+        """Set ``base_url`` by environment name.
+
+        Valid values: ``"production"``, ``"sandbox"``. Raises :class:`ValueError`
+        for unknown names. Side effect: updates ``self.base_url``.
+        """
         env_str = str(value)
         if env_str not in _ENVIRONMENTS:
             raise ValueError(f"Unknown environment: {value!r}. Must be 'production' or 'sandbox'.")
